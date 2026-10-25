@@ -146,9 +146,10 @@ change as scheduled cycles run; the frozen review does not.
 
 ## Before submission
 
-Copy `config/group.example.json` to `config/group.json` and fill in the actual
-group ID, 2–6 members, BITS IDs, qualitative contributions and percentages
-(totalling 100). Add the completed video URL. Capture new dashboard screenshots
+`config/group.json` contains Group 15's five supplied members and their 20%
+contribution allocations. Review the contribution descriptions with the group
+and add the completed video URL. For another group, start from
+`config/group.example.json` and supply its actual details. Capture new dashboard screenshots
 in `outputs/current/screenshots/` using the names in `docs/DEMONSTRATION.md`.
 
 The final report command is `python -m src.generate_report`. It refuses stale

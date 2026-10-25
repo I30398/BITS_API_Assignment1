@@ -89,8 +89,11 @@ Provisioning checkpoint, 26 October 2026:
 `scripts/lab_start.py` resumes this provisioned setup: it restores/verifies the
 hard mount, checks the existing cluster's private connection and durability,
 then invokes the cloud launcher. It never initializes or resets a cluster. Its
-Linux execution is still pending; only help/syntax checks have run locally.
-Once validated, run `.venv/bin/python scripts/lab_start.py` in the remote terminal.
+Linux startup was verified on a replacement lab VM on 26 October 2026: the
+existing workspace and database survived, the hard mount was restored, and the
+private dashboard and scheduler started successfully. All 14 functional checks
+passed again. Run `.venv/bin/python scripts/lab_start.py` in the remote terminal.
+Graceful shutdown remains to be checked on the lab.
 Ctrl+C stops the owned assignment services before stopping a database it started;
 an already-running database is left running. The hard mount must be restored on
 each new lab VM session; no persistent system mount configuration was changed.
