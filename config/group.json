@@ -1,0 +1,37 @@
+{
+  "group_id": "15",
+  "members": [
+    {
+      "bits_id": "2025MT03009",
+      "name": "Moulik Patra",
+      "contribution": "Workflow architecture, cloud runtime configuration, and Prefect deployment with the 120-second schedule and concurrency controls.",
+      "percentage": 20
+    },
+    {
+      "bits_id": "2025NT03083",
+      "name": "Ajeet Kumar Yadav",
+      "contribution": "Dataset ingestion and data preparation: missing values, duplicate records, column types, cleaned outputs, and preprocessing logs.",
+      "percentage": 20
+    },
+    {
+      "bits_id": "2025MT03141",
+      "name": "Yuvraj Vijay Vedpathak",
+      "contribution": "Exploratory data analysis: descriptive statistics, numeric and categorical distributions, association analysis, and interpretation of visualizations.",
+      "percentage": 20
+    },
+    {
+      "bits_id": "2025MT03071",
+      "name": "Soumyajyoti Biswas",
+      "contribution": "Machine learning: stratified 70/30 split, train-fitted preprocessing, Logistic Regression and Random Forest training, and comparison of five evaluation metrics.",
+      "percentage": 20
+    },
+    {
+      "bits_id": "2024MT03582",
+      "name": "Yakkanti Sivaiah",
+      "contribution": "Operational API access, dashboard monitoring, scheduled-run verification, and consolidation of execution evidence and report results.",
+      "percentage": 20
+    }
+  ],
+  "video_url": "",
+  "cloud_evidence_confirmed": false
+}

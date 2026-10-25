@@ -40,6 +40,9 @@ After setup, run `python scripts/local.py`. It starts the dashboard and schedule
 and prints the local URL. Keep the window open; Ctrl+C stops the services that
 this launcher started. An already running server is reused and left running.
 Use `python scripts/local.py --once` for a single complete cycle.
+Readiness allows 180 seconds by default; use `--startup-timeout 300` for a slow
+cold start. SQLite requires local disk. NFS/SMB database paths are rejected;
+configure PostgreSQL for such hosts (see `docs/DEPLOYMENT.md`).
 
 The separate-terminal commands below are useful when inspecting each component.
 
