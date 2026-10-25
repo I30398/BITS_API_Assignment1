@@ -1,0 +1,12 @@
+# CCZG506 Assignment I - Cloud-based Data Science / ML Application
+# Tested with Python 3.14 on Windows 11
+
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+prefect==3.8.8
+# Prefect 3.8.x scheduler breaks on SQLAlchemy 2.1 (bulk DML change); pin to 2.0.x
+sqlalchemy<2.1
+python-docx

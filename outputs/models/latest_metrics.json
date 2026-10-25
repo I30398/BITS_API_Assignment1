@@ -1,0 +1,32 @@
+{
+  "run_ts": "2026-10-25T06:03:20.008176+00:00",
+  "models": [
+    {
+      "model": "LogisticRegression",
+      "accuracy": 0.7956,
+      "precision": 0.6381,
+      "recall": 0.5312,
+      "f1_score": 0.5798,
+      "roc_auc": 0.8351,
+      "ts": "2026-10-25T06:03:18.484304+00:00"
+    },
+    {
+      "model": "RandomForest",
+      "accuracy": 0.7894,
+      "precision": 0.6368,
+      "recall": 0.4813,
+      "f1_score": 0.5482,
+      "roc_auc": 0.8208,
+      "ts": "2026-10-25T06:03:19.205537+00:00"
+    }
+  ],
+  "best": {
+    "model": "LogisticRegression",
+    "accuracy": 0.7956,
+    "precision": 0.6381,
+    "recall": 0.5312,
+    "f1_score": 0.5798,
+    "roc_auc": 0.8351,
+    "ts": "2026-10-25T06:03:18.484304+00:00"
+  }
+}

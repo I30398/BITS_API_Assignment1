@@ -1,0 +1,33 @@
+======================================================================
+PREFECT BUILT-IN API - KEY APPLICATION DETAILS
+Retrieved at: 2026-10-19T08:13:20.122023+00:00
+======================================================================
+
+[1] FLOWS (2)
+    - telco-data-pipeline  (id=492f87ce...)
+    - telco-ml-pipeline  (id=feb5c52d...)
+
+[2] DEPLOYMENTS (2)
+    - telco-data-pipeline-every-2min  | every 120s [active]  | tags=['dataops', 'assignment1']
+    - telco-ml-pipeline-every-2min  | every 120s [active]  | tags=['mlops', 'assignment1']
+
+[3] RECENT FLOW RUNS (10)
+    - amiable-skua                 state=Completed    start=2026-10-19T08:13:10.414282+00:00
+    - awesome-pony                 state=Completed    start=2026-10-19T08:13:09.419204+00:00
+    - silky-cobra                  state=Completed    start=2026-10-19T08:11:13.092513+00:00
+    - peculiar-cuckoo              state=Completed    start=2026-10-19T08:11:12.900182+00:00
+    - tasteful-jaguar              state=Completed    start=2026-10-19T08:09:09.963634+00:00
+    - happy-hamster                state=Completed    start=2026-10-19T08:09:09.912476+00:00
+    - smiling-lorikeet             state=Completed    start=2026-10-19T08:06:52.089940+00:00
+    - amazing-tortoise             state=Completed    start=2026-10-19T08:06:52.059657+00:00
+    - black-impala                 state=Completed    start=2026-10-19T07:58:30.858827+00:00
+    - marble-pudu                  state=Completed    start=2026-10-19T07:58:23.221204+00:00
+
+[4] WORK POOLS
+
+[5] RUN STATISTICS
+    flows=2  deployments=2  runs_sampled=73
+    runs_by_state={'Completed': 12, 'Failed': 1, 'Scheduled': 60}
+
+======================================================================
+Saved full API response to: C:\Users\I30398\OneDrive - Microchip Technology Inc\Workspace\Personal\MTech\3rdDsem\ADCN\Assignment1\outputs\api_details.json

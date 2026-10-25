@@ -1,0 +1,120 @@
+{
+  "retrieved_at": "2026-10-19T08:13:20.122023+00:00",
+  "flows": [
+    {
+      "name": "telco-data-pipeline",
+      "id": "492f87ce-e4ce-4af9-8c16-cf00cbc2e7ee",
+      "created": "2026-10-19T07:54:28.536556+00:00"
+    },
+    {
+      "name": "telco-ml-pipeline",
+      "id": "feb5c52d-8b58-4f7e-9c05-e94f6a0c7c4f",
+      "created": "2026-10-19T07:55:33.716925+00:00"
+    }
+  ],
+  "deployments": [
+    {
+      "name": "telco-data-pipeline-every-2min",
+      "id": "c54c02f8-4f49-431b-ab4d-63c9bc9091b8",
+      "paused": false,
+      "tags": [
+        "dataops",
+        "assignment1"
+      ],
+      "schedules": [
+        {
+          "active": true,
+          "interval_seconds": 120.0
+        }
+      ]
+    },
+    {
+      "name": "telco-ml-pipeline-every-2min",
+      "id": "69ba92d1-798f-4028-96c6-b09478c26342",
+      "paused": false,
+      "tags": [
+        "mlops",
+        "assignment1"
+      ],
+      "schedules": [
+        {
+          "active": true,
+          "interval_seconds": 120.0
+        }
+      ]
+    }
+  ],
+  "recent_flow_runs": [
+    {
+      "name": "amiable-skua",
+      "state": "Completed",
+      "start_time": "2026-10-19T08:13:10.414282+00:00",
+      "total_run_time_s": 1.635672
+    },
+    {
+      "name": "awesome-pony",
+      "state": "Completed",
+      "start_time": "2026-10-19T08:13:09.419204+00:00",
+      "total_run_time_s": 2.724707
+    },
+    {
+      "name": "silky-cobra",
+      "state": "Completed",
+      "start_time": "2026-10-19T08:11:13.092513+00:00",
+      "total_run_time_s": 1.891969
+    },
+    {
+      "name": "peculiar-cuckoo",
+      "state": "Completed",
+      "start_time": "2026-10-19T08:11:12.900182+00:00",
+      "total_run_time_s": 3.251314
+    },
+    {
+      "name": "tasteful-jaguar",
+      "state": "Completed",
+      "start_time": "2026-10-19T08:09:09.963634+00:00",
+      "total_run_time_s": 2.40012
+    },
+    {
+      "name": "happy-hamster",
+      "state": "Completed",
+      "start_time": "2026-10-19T08:09:09.912476+00:00",
+      "total_run_time_s": 1.344925
+    },
+    {
+      "name": "smiling-lorikeet",
+      "state": "Completed",
+      "start_time": "2026-10-19T08:06:52.089940+00:00",
+      "total_run_time_s": 2.552725
+    },
+    {
+      "name": "amazing-tortoise",
+      "state": "Completed",
+      "start_time": "2026-10-19T08:06:52.059657+00:00",
+      "total_run_time_s": 1.475777
+    },
+    {
+      "name": "black-impala",
+      "state": "Completed",
+      "start_time": "2026-10-19T07:58:30.858827+00:00",
+      "total_run_time_s": 1.04254
+    },
+    {
+      "name": "marble-pudu",
+      "state": "Completed",
+      "start_time": "2026-10-19T07:58:23.221204+00:00",
+      "total_run_time_s": 2.185352
+    }
+  ],
+  "work_pools": [],
+  "run_statistics": {
+    "total_flow_runs_sampled": 73,
+    "runs_by_state": {
+      "Completed": 12,
+      "Failed": 1,
+      "Scheduled": 60
+    },
+    "n_flows": 2,
+    "n_deployments": 2
+  }
+}
