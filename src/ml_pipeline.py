@@ -24,8 +24,7 @@ from prefect import flow, task, get_run_logger
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from filelock import FileLock
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
     roc_auc_score, confusion_matrix,
@@ -33,6 +32,9 @@ from sklearn.metrics import (
 
 from src import config, viz_style as vs
 from src.logging_utils import log_activity
+from src.modelling import make_model
+from src.artifact_io import atomic_path, write_json, source_fingerprint, sha256_file
+from src.dashboard_artifacts import publish_table
 
 LOGFILE = "ml_pipeline.jsonl"
 
@@ -49,25 +51,28 @@ def _log(step: str, message: str, **fields):
 # ---------------------------------------------------------------------------
 # 2.1 / 2.2 - prepare & split
 # ---------------------------------------------------------------------------
-@task(name="load-clean-data")
-def load_clean():
-    if not config.CLEAN_DATASET.exists():
-        # Fall back to running the data pipeline's cleaning inline.
-        from src import preprocessing as pp, eda
+@task(name="load-model-data")
+def load_model_data(model_input=None):
+    if model_input is None:
+        from src import preprocessing as pp
         df = pp.coerce_types(pp.load_raw())
-        df = pp.impute_numeric(df)
-        df, _ = eda.encode_categoricals(df)
+        df, _ = pp.induce_missing(df)
     else:
-        df = pd.read_csv(config.CLEAN_DATASET)
-    _log("2.1-load", "Loaded cleaned dataset for modelling",
+        df = model_input.copy()
+    if set(df[config.TARGET_COLUMN].dropna().unique()) != {"No", "Yes"}:
+        raise ValueError("ML requires the pre-imputation data with Yes/No labels.")
+    if df[config.TARGET_COLUMN].isna().any():
+        raise ValueError("Target labels must not be missing.")
+    _log("2.1-load", "Loaded pre-imputation snapshot; transformations fit on train only",
          rows=int(df.shape[0]), cols=int(df.shape[1]))
     return df
 
 
 @task(name="train-test-split")
 def split(df):
-    X = df.drop(columns=[config.ID_COLUMN, config.TARGET_COLUMN], errors="ignore")
-    y = df[config.TARGET_COLUMN]
+    X = df.drop(columns=[config.ID_COLUMN, config.TARGET_COLUMN]
+                + [f"{c}_norm" for c in config.NUMERIC_COLUMNS], errors="ignore")
+    y = df[config.TARGET_COLUMN].map({"No": 0, "Yes": 1})
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=config.TEST_SIZE,
         random_state=config.RANDOM_STATE, stratify=y,
@@ -87,9 +92,9 @@ def _evaluate(name, model, X_test, y_test) -> dict:
     metrics = {
         "model": name,
         "accuracy": round(float(accuracy_score(y_test, y_pred)), 4),
-        "precision": round(float(precision_score(y_test, y_pred)), 4),
-        "recall": round(float(recall_score(y_test, y_pred)), 4),
-        "f1_score": round(float(f1_score(y_test, y_pred)), 4),
+        "precision": round(float(precision_score(y_test, y_pred, zero_division=0)), 4),
+        "recall": round(float(recall_score(y_test, y_pred, zero_division=0)), 4),
+        "f1_score": round(float(f1_score(y_test, y_pred, zero_division=0)), 4),
         "roc_auc": round(float(roc_auc_score(y_test, y_proba)), 4),
         "ts": datetime.now(timezone.utc).isoformat(),
     }
@@ -99,11 +104,8 @@ def _evaluate(name, model, X_test, y_test) -> dict:
 
 @task(name="train-logistic-regression")
 def train_logreg(X_train, X_test, y_train, y_test):
-    # Scale features so Logistic Regression converges cleanly.
-    model = make_pipeline(
-        StandardScaler(),
-        LogisticRegression(max_iter=1000, random_state=config.RANDOM_STATE),
-    )
+    model = make_model(LogisticRegression(max_iter=1000,
+                       random_state=config.RANDOM_STATE), X_train.columns)
     model.fit(X_train, y_train)
     metrics, cm, proba = _evaluate("LogisticRegression", model, X_test, y_test)
     _persist_model("logistic_regression", model)
@@ -113,9 +115,9 @@ def train_logreg(X_train, X_test, y_train, y_test):
 
 @task(name="train-random-forest")
 def train_rf(X_train, X_test, y_train, y_test):
-    model = RandomForestClassifier(
+    model = make_model(RandomForestClassifier(
         n_estimators=200, random_state=config.RANDOM_STATE, n_jobs=-1
-    )
+    ), X_train.columns)
     model.fit(X_train, y_train)
     metrics, cm, proba = _evaluate("RandomForest", model, X_test, y_test)
     _persist_model("random_forest", model)
@@ -125,8 +127,9 @@ def train_rf(X_train, X_test, y_train, y_test):
 
 def _persist_model(name, model):
     config.ensure_dirs()
-    with (config.MODELS_DIR / f"{name}.pkl").open("wb") as fh:
-        pickle.dump(model, fh)
+    with atomic_path(config.MODELS_DIR / f"{name}.pkl") as temp:
+        with temp.open("wb") as fh:
+            pickle.dump(model, fh)
 
 
 # ---------------------------------------------------------------------------
@@ -134,12 +137,17 @@ def _persist_model(name, model):
 # ---------------------------------------------------------------------------
 @task(name="record-metrics-history")
 def record_history(all_metrics: list[dict]):
-    """Append this run's metrics to a CSV so drift can be monitored over time."""
+    """Retain repeated evaluation history; this is not live drift detection."""
     config.ensure_dirs()
     path = config.MODELS_DIR / "metrics_history.csv"
     df = pd.DataFrame(all_metrics)
-    header = not path.exists()
-    df.to_csv(path, mode="a", header=header, index=False)
+    df["pipeline_version"] = config.PIPELINE_VERSION
+    df["source_sha256"] = source_fingerprint()
+    publish_table("telco-model-metrics", pd.DataFrame(all_metrics),
+                  "Five holdout metrics per model. All transformations fit on training data only.")
+    with FileLock(str(path) + ".lock", timeout=30):
+        header = not path.exists()
+        df.to_csv(path, mode="a", header=header, index=False)
     _log("2.4-mlops", "Appended metrics to monitoring history",
          path=str(path), models=[m["model"] for m in all_metrics])
     return path
@@ -166,7 +174,8 @@ def plot_comparison(all_metrics: list[dict]):
     ax.grid(axis="x", visible=False)
     fig.tight_layout()
     path = config.MODELS_DIR / "model_comparison.png"
-    fig.savefig(path, bbox_inches="tight")
+    with atomic_path(path) as temp:
+        fig.savefig(temp, bbox_inches="tight")
     plt.close(fig)
     _log("2.4-mlops", "Saved model comparison chart", chart=str(path))
     return str(path)
@@ -182,7 +191,7 @@ def plot_confusions(results):
         im = ax.imshow(cm, cmap="Blues")
         for (r, c), v in np.ndenumerate(cm):
             ax.text(c, r, str(v), ha="center", va="center",
-                    color=vs.INK, fontweight="bold")
+                    color="white" if v > cm.max() / 2 else vs.INK, fontweight="bold")
         ax.set_xticks([0, 1], ["No", "Yes"])
         ax.set_yticks([0, 1], ["No", "Yes"])
         ax.set_xlabel("Predicted")
@@ -192,7 +201,8 @@ def plot_confusions(results):
     fig.suptitle("MLOps: Confusion Matrices", fontweight="bold")
     fig.tight_layout()
     path = config.MODELS_DIR / "confusion_matrices.png"
-    fig.savefig(path, bbox_inches="tight")
+    with atomic_path(path) as temp:
+        fig.savefig(temp, bbox_inches="tight")
     plt.close(fig)
     _log("2.4-mlops", "Saved confusion matrices", chart=str(path))
     return str(path)
@@ -202,11 +212,11 @@ def plot_confusions(results):
 # Flow
 # ---------------------------------------------------------------------------
 @flow(name="telco-ml-pipeline", log_prints=True)
-def ml_pipeline():
+def ml_pipeline(model_input=None):
     config.ensure_dirs()
     _log("flow-start", "ML pipeline run started")
 
-    df = load_clean()
+    df = load_model_data(model_input)
     X_train, X_test, y_train, y_test = split(df)
 
     lr_model, lr_metrics, lr_cm = train_logreg(X_train, X_test, y_train, y_test)
@@ -222,11 +232,16 @@ def ml_pipeline():
          best_model=best["model"], best_f1=best["f1_score"])
 
     # Write a compact summary for the report / API consumers.
-    (config.MODELS_DIR / "latest_metrics.json").write_text(
-        json.dumps({"run_ts": datetime.now(timezone.utc).isoformat(),
-                    "models": all_metrics, "best": best}, indent=2),
-        encoding="utf-8",
-    )
+    write_json({"run_ts": datetime.now(timezone.utc).isoformat(),
+                "models": all_metrics, "best": best,
+                "train_rows": len(X_train), "test_rows": len(X_test),
+                "features": list(X_train.columns),
+                "preprocessing_fit_scope": "training_only",
+                "pipeline_version": config.PIPELINE_VERSION,
+                "source_sha256": source_fingerprint(),
+                "raw_dataset_sha256": sha256_file(config.RAW_DATASET),
+                "monitoring_scope": "Repeated holdout evaluation on a fixed dataset; no live drift detection"},
+               config.MODELS_DIR / "latest_metrics.json")
     return all_metrics
 
 

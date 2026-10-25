@@ -1,92 +1,159 @@
-# CCZG506 Assignment I — Cloud-based Data Science / ML Application
+# CCZG506 Assignment I — Telecom Customer Churn
 
-**Business problem:** Telecom Customer Churn Prediction (binary classification).
-**Orchestration / dashboard / API:** [Prefect](https://www.prefect.io/) 3.8.
+A Prefect workflow prepares and explores the IBM Telco dataset, then trains and
+compares Logistic Regression and Random Forest classifiers. The assignment's
+8-mark data pipeline, 5-mark ML pipeline and 2-mark API access objectives are
+mapped in `docs/REQUIREMENTS.md`.
 
-The project implements all three sub-objectives:
+## What changed
 
-| Sub-objective | What | Where |
-|---|---|---|
-| 1. Data Pipeline (8) | Ingestion, preprocessing, EDA, DataOps (scheduled every 2 min, logged to dashboard) | `src/data_pipeline.py`, `src/preprocessing.py`, `src/eda.py` |
-| 2. ML Pipeline (5) | 2 models, 70/30 split, evaluation, MLOps (≥4 metrics logged) | `src/ml_pipeline.py` |
-| 3. API Access (2) | Retrieve & display ≥4 application details via Prefect's built-in REST API | `src/api_access.py` |
+- One scheduled parent workflow runs **DataOps first, then MLOps** every 120 seconds.
+  The deployment and runner both limit concurrency to one cycle.
+- ML receives a pre-imputation data snapshot. The 70/30 stratified split happens
+  before fitting median imputation, standardisation and one-hot encoding.
+- Numeric features appear once in each model. EDA uses numeric Pearson
+  correlations and Cramer's V for categorical associations.
+- Atomic replacement publishes complete files; file locks protect append logs.
+- Actual column types, preprocessing tables and five metrics per model appear
+  in the Prefect dashboard as artifacts as well as task logs.
+- New outputs are under `outputs/current/`. The original files under `outputs/`,
+  `data/telco_churn_clean.csv` and `report/` are **historical baseline evidence**.
+  They do not validate the revised code.
 
-## Dataset
-IBM Telco Customer Churn — 7,043 records, 21 columns. Downloaded to
-`data/telco_churn.csv` (public, no auth). Source URL is in `src/config.py`.
+## Local setup
 
-## Setup
+Use **Python 3.12**. The complete runtime dependency set is pinned in
+`requirements-lock.txt`; `requirements.txt` lists the direct dependencies.
+
 ```bash
-pip install -r requirements.txt
-```
-> Note: Prefect 3.8's scheduler is incompatible with SQLAlchemy ≥ 2.1
-> (bulk-DML change). `requirements.txt` pins `sqlalchemy<2.1`.
-
-## Run
-
-> Run Prefect via `python -m prefect` (not the bare `prefect` command). On this
-> machine the `prefect.exe` launcher is installed to a Scripts folder that is
-> **not on PATH**, so `prefect server start` fails with
-> *"prefect is not recognized..."*. `python -m prefect` always works.
-
-**Terminal 1 — start the Prefect server + dashboard:**
-```powershell
-python -m prefect server start
-# dashboard: http://127.0.0.1:4200
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-lock.txt
 ```
 
-**Terminal 2 — point the client at the server, then run the pieces:**
-```powershell
-# PowerShell:
-$env:PREFECT_API_URL = "http://127.0.0.1:4200/api"
+On Windows, create the environment with `py -3.12 -m venv .venv` and activate it
+with `.venv\Scripts\Activate.ps1` in PowerShell.
 
-python -m src.data_pipeline      # run the data pipeline once
-python -m src.ml_pipeline         # run the ML pipeline once
-python -m src.deploy              # schedule BOTH flows every 2 minutes (blocks)
-python -m src.api_access          # retrieve & print key app details
-python -m src.generate_report     # build the Word submission doc
-```
+### One-command local launcher
 
-Setting the API URL in other shells:
+After setup, run `python scripts/local.py`. It starts the dashboard and schedule
+and prints the local URL. Keep the window open; Ctrl+C stops the services that
+this launcher started. An already running server is reused and left running.
+Use `python scripts/local.py --once` for a single complete cycle.
+
+The separate-terminal commands below are useful when inspecting each component.
+
+**Terminal 1 — server and dashboard**
+
 ```bash
-# bash:          export PREFECT_API_URL=http://127.0.0.1:4200/api
-# cmd.exe:       set PREFECT_API_URL=http://127.0.0.1:4200/api
+python -m prefect server start --host 127.0.0.1 --port 4207
 ```
 
-Open the dashboard to watch the scheduled 2-minute runs, per-task logs, and
-activity details.
+Open [the local dashboard](http://127.0.0.1:4207).
 
-<details>
-<summary>Optional: make the bare <code>prefect</code> command work</summary>
+**Terminal 2 — use that server**
 
-Add the Scripts folder to PATH for the current PowerShell session:
-```powershell
-$env:Path += ";C:\Users\I30398\AppData\Roaming\Python\Python314\Scripts"
-prefect server start
+```bash
+source .venv/bin/activate
+export PREFECT_API_URL=http://127.0.0.1:4207/api
+python -m src.workflow       # run one complete cycle
+python -m src.deploy         # serve the 120-second schedule; keep running
 ```
-To make it permanent, add that folder to your user PATH via *Edit environment
-variables for your account*, then reopen the terminal.
-</details>
 
-## Outputs
-- `outputs/eda/` — EDA charts (univariate, bivariate, correlation, importance)
-- `outputs/models/` — trained models, metrics history, comparison + confusion charts
-- `outputs/logs/*.jsonl` — structured activity logs for every task
-- `outputs/api_details.json` — API response captured for the report
-- `outputs/screenshots/` — dashboard screenshots
-- `report/CCZG506_Assignment1_Report.docx` — submission document
+In PowerShell use `$env:PREFECT_API_URL = "http://127.0.0.1:4207/api"` instead
+of `export`. Keep both terminals running for scheduled execution.
 
-## Structure
+**Terminal 3 — capture application details and verify**
+
+```bash
+source .venv/bin/activate
+export PREFECT_API_URL=http://127.0.0.1:4207/api
+python -m src.verify --wait-scheduled
+python -m src.generate_report --draft
 ```
-src/
-  config.py          # paths, dataset + ML config
-  logging_utils.py   # structured JSON activity logging
-  viz_style.py       # colourblind-safe chart palette/style
-  preprocessing.py   # Activity 1.3
-  eda.py             # Activity 1.4
-  data_pipeline.py   # Prefect flow: 1.3 + 1.4 (Activity 1.5)
-  ml_pipeline.py     # Prefect flow: 2.1–2.4
-  deploy.py          # schedule both flows every 2 minutes
-  api_access.py      # Sub-objective 3
-  generate_report.py # build the .docx
+
+Verification waits up to 330 seconds for two completed scheduled parent runs.
+It saves current API results, integrity checks, scheduled run IDs and artifact
+hashes to `outputs/current/verification.json`. It does not verify cloud hosting.
+To capture only the API evidence, run `python -m src.api_access`.
+
+The draft report is `report/current/CCZG506_Assignment1_Review.docx`.
+
+## Docker deployment
+
+Docker Desktop or Docker Engine with Compose can run the same project without
+a local Python installation:
+
+```bash
+docker compose up --build -d
+docker compose logs -f runner
 ```
+
+The dashboard is still [http://127.0.0.1:4207](http://127.0.0.1:4207).
+Persistent named volumes retain the server database and application outputs.
+
+```bash
+docker compose exec runner python -m src.verify --wait-scheduled
+docker compose cp runner:/app/outputs/current/. outputs/test-docker/
+docker compose down
+```
+
+`down` stops this Compose project and retains its volumes. Only one server should
+bind host port 4207 at a time; stop the Python server before starting Compose.
+
+The package can also run on a cloud VM. Follow `docs/DEPLOYMENT.md` for a private
+SSH-tunnel arrangement. A local web dashboard, a Docker image or the setting
+`ASSIGNMENT_ENVIRONMENT=cloud` alone does **not** demonstrate cloud deployment.
+
+## Results and limitations
+
+The raw public CSV has 7043 records and 21 columns. Its source is recorded in
+`src/config.py`. A fixed seed induces 5% missing values in three numeric columns.
+The ML pipeline keeps 4930 training records and 2113 test records, and logs
+accuracy, precision, recall, F1 and ROC AUC for each model.
+
+Repeated evaluation on this fixed dataset demonstrates metric logging and
+history. It does not establish production drift detection, live customer churn
+performance or a continuously changing ingestion source. The baseline and
+revised model metrics should not be treated as directly comparable experiments:
+preprocessing and categorical encoding changed.
+
+Standalone `python -m src.data_pipeline` and `python -m src.ml_pipeline` remain
+available for inspection. The ML command prepares its own raw-data snapshot;
+it never reads the full-data EDA CSV. Use the scheduled parent workflow for the
+complete assignment demonstration.
+
+## Testing
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+The regressions cover train-only fitting, unseen categories, the stratified
+split, interrupted publication, concurrent readers/writers and cross-process
+JSON logging. `src.verify` checks the actual server and generated evidence.
+
+## Reviewed checkpoint
+
+See `docs/VALIDATION.md` and `evidence/README.md` for the frozen local and Docker
+verification results. The frozen report is
+`evidence/local-review/CCZG506_Assignment1_Review.docx`. Live outputs continue to
+change as scheduled cycles run; the frozen review does not.
+
+## Before submission
+
+Copy `config/group.example.json` to `config/group.json` and fill in the actual
+group ID, 2–6 members, BITS IDs, qualitative contributions and percentages
+(totalling 100). Add the completed video URL. Capture new dashboard screenshots
+in `outputs/current/screenshots/` using the names in `docs/DEMONSTRATION.md`.
+
+The final report command is `python -m src.generate_report`. It refuses stale
+model/API evidence, incomplete group details, absent screenshots or unconfirmed
+cloud evidence. `cloud_evidence_confirmed` is a human confirmation after checking
+actual hosting evidence, not an automatic cloud detection result. Leave it
+false for local review. The report is named after the group ID; only one member
+uploads the final Word/PDF document to the portal.
+
+Assignment I's supplied brief says **30 October 2026, 11:55 pm**. Confirm any
+subsequent faculty announcement separately.

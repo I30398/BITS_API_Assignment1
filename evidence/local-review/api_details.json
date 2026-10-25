@@ -1,0 +1,235 @@
+{
+  "retrieved_at": "2026-10-25T09:06:54.285092+00:00",
+  "source_sha256": "09b367c85672de3db3bb76acc243bb41a27328fc2ba4e396e817375a63596dcd",
+  "pipeline_version": "2",
+  "flows": [
+    {
+      "name": "telco-assignment-workflow",
+      "id": "672fcf01-fd67-43ac-b989-650b9695012d",
+      "created": "2026-10-25T08:44:12.716036+00:00"
+    },
+    {
+      "name": "telco-data-pipeline",
+      "id": "f20d1bbf-d530-48ba-aab8-ffca68bf58a8",
+      "created": "2026-10-25T08:44:12.923200+00:00"
+    },
+    {
+      "name": "telco-ml-pipeline",
+      "id": "302829a4-b47c-4a5d-92ee-5c9d92f5d811",
+      "created": "2026-10-25T08:46:49.218876+00:00"
+    }
+  ],
+  "deployments": [
+    {
+      "name": "telco-assignment-every-2min",
+      "id": "f4384b14-e9cb-4aea-93fb-2c809f50e4f0",
+      "paused": false,
+      "concurrency_limit": 1,
+      "tags": [
+        "assignment1",
+        "dataops",
+        "mlops"
+      ],
+      "schedules": [
+        {
+          "active": true,
+          "interval_seconds": 120.0
+        }
+      ]
+    }
+  ],
+  "recent_flow_runs": [
+    {
+      "name": "innocent-mouse",
+      "state": "Completed",
+      "id": "7612277f-8979-4abb-9976-913fa09c262f",
+      "flow_id": "302829a4-b47c-4a5d-92ee-5c9d92f5d811",
+      "deployment_id": null,
+      "start_time": "2026-10-25T09:05:33.420782+00:00",
+      "total_run_time_s": 0.63965
+    },
+    {
+      "name": "handsome-pony",
+      "state": "Completed",
+      "id": "c83aceac-1d3b-45ab-9869-cde15361cc4b",
+      "flow_id": "f20d1bbf-d530-48ba-aab8-ffca68bf58a8",
+      "deployment_id": null,
+      "start_time": "2026-10-25T09:05:31.170469+00:00",
+      "total_run_time_s": 1.030549
+    },
+    {
+      "name": "screeching-toucanet",
+      "state": "Completed",
+      "id": "01a1723e-5d3a-75ed-949e-8e2a08d09a83",
+      "flow_id": "672fcf01-fd67-43ac-b989-650b9695012d",
+      "deployment_id": "f4384b14-e9cb-4aea-93fb-2c809f50e4f0",
+      "start_time": "2026-10-25T09:05:31.090068+00:00",
+      "total_run_time_s": 3.357556
+    },
+    {
+      "name": "jasper-smilodon",
+      "state": "Completed",
+      "id": "05d81291-33d0-4c1b-b5ab-3b9e8cf33647",
+      "flow_id": "302829a4-b47c-4a5d-92ee-5c9d92f5d811",
+      "deployment_id": null,
+      "start_time": "2026-10-25T09:03:32.578022+00:00",
+      "total_run_time_s": 0.571999
+    },
+    {
+      "name": "celestial-cockatrice",
+      "state": "Completed",
+      "id": "d9840590-deb4-4c87-9e0d-6b43c9d2efff",
+      "flow_id": "f20d1bbf-d530-48ba-aab8-ffca68bf58a8",
+      "deployment_id": null,
+      "start_time": "2026-10-25T09:03:30.420606+00:00",
+      "total_run_time_s": 1.027644
+    },
+    {
+      "name": "resilient-lizard",
+      "state": "Completed",
+      "id": "01a1723e-5d3a-7173-823e-7917c65f5c52",
+      "flow_id": "672fcf01-fd67-43ac-b989-650b9695012d",
+      "deployment_id": "f4384b14-e9cb-4aea-93fb-2c809f50e4f0",
+      "start_time": "2026-10-25T09:03:30.333091+00:00",
+      "total_run_time_s": 3.273064
+    },
+    {
+      "name": "uptight-horse",
+      "state": "Completed",
+      "id": "d74a220e-414d-405d-80cc-c05943598123",
+      "flow_id": "302829a4-b47c-4a5d-92ee-5c9d92f5d811",
+      "deployment_id": null,
+      "start_time": "2026-10-25T09:01:34.288057+00:00",
+      "total_run_time_s": 0.569037
+    },
+    {
+      "name": "apricot-boar",
+      "state": "Completed",
+      "id": "94ba7611-4b29-4c99-9434-a30cdb780804",
+      "flow_id": "f20d1bbf-d530-48ba-aab8-ffca68bf58a8",
+      "deployment_id": null,
+      "start_time": "2026-10-25T09:01:32.135139+00:00",
+      "total_run_time_s": 1.064398
+    },
+    {
+      "name": "conscious-leech",
+      "state": "Completed",
+      "id": "01a1723e-5d3a-7095-a298-3b60f7ecab91",
+      "flow_id": "672fcf01-fd67-43ac-b989-650b9695012d",
+      "deployment_id": "f4384b14-e9cb-4aea-93fb-2c809f50e4f0",
+      "start_time": "2026-10-25T09:01:32.059210+00:00",
+      "total_run_time_s": 3.253299
+    },
+    {
+      "name": "romantic-tamarin",
+      "state": "Completed",
+      "id": "dd12c37a-a2b0-4d6f-a0d4-3d9adebf0bd0",
+      "flow_id": "302829a4-b47c-4a5d-92ee-5c9d92f5d811",
+      "deployment_id": null,
+      "start_time": "2026-10-25T09:00:19.028956+00:00",
+      "total_run_time_s": 0.569803
+    },
+    {
+      "name": "ingenious-octopus",
+      "state": "Completed",
+      "id": "d28700c0-9305-4158-b593-0e39a03558c8",
+      "flow_id": "f20d1bbf-d530-48ba-aab8-ffca68bf58a8",
+      "deployment_id": null,
+      "start_time": "2026-10-25T09:00:16.872251+00:00",
+      "total_run_time_s": 1.125608
+    },
+    {
+      "name": "resolute-woodpecker",
+      "state": "Completed",
+      "id": "625435e2-00e7-4ef5-afeb-ae378c36cf50",
+      "flow_id": "672fcf01-fd67-43ac-b989-650b9695012d",
+      "deployment_id": null,
+      "start_time": "2026-10-25T09:00:16.808899+00:00",
+      "total_run_time_s": 3.245633
+    },
+    {
+      "name": "gifted-honeybee",
+      "state": "Completed",
+      "id": "fabc9d0e-6109-4894-a942-2eaca0168620",
+      "flow_id": "302829a4-b47c-4a5d-92ee-5c9d92f5d811",
+      "deployment_id": null,
+      "start_time": "2026-10-25T08:59:33.180550+00:00",
+      "total_run_time_s": 0.573057
+    },
+    {
+      "name": "iron-gerbil",
+      "state": "Completed",
+      "id": "59e8b8db-2429-43a1-9024-d4be7d78119a",
+      "flow_id": "f20d1bbf-d530-48ba-aab8-ffca68bf58a8",
+      "deployment_id": null,
+      "start_time": "2026-10-25T08:59:31.016023+00:00",
+      "total_run_time_s": 1.026754
+    },
+    {
+      "name": "active-skua",
+      "state": "Completed",
+      "id": "01a1723e-5d3a-71cb-b196-3201959ecdaf",
+      "flow_id": "672fcf01-fd67-43ac-b989-650b9695012d",
+      "deployment_id": "f4384b14-e9cb-4aea-93fb-2c809f50e4f0",
+      "start_time": "2026-10-25T08:59:30.919283+00:00",
+      "total_run_time_s": 3.281395
+    },
+    {
+      "name": "heavenly-slug",
+      "state": "Completed",
+      "id": "44c9682b-9c31-4ba1-8fc3-329503256159",
+      "flow_id": "302829a4-b47c-4a5d-92ee-5c9d92f5d811",
+      "deployment_id": null,
+      "start_time": "2026-10-25T08:58:31.896481+00:00",
+      "total_run_time_s": 0.599661
+    },
+    {
+      "name": "myrtle-wrasse",
+      "state": "Completed",
+      "id": "2513555f-2daa-4434-963f-62a7a0e37479",
+      "flow_id": "f20d1bbf-d530-48ba-aab8-ffca68bf58a8",
+      "deployment_id": null,
+      "start_time": "2026-10-25T08:58:29.743127+00:00",
+      "total_run_time_s": 1.232638
+    },
+    {
+      "name": "enigmatic-toucan",
+      "state": "Completed",
+      "id": "1d086fdd-dacc-4ccd-9fa9-5aeeedf82b54",
+      "flow_id": "672fcf01-fd67-43ac-b989-650b9695012d",
+      "deployment_id": null,
+      "start_time": "2026-10-25T08:58:29.606525+00:00",
+      "total_run_time_s": 3.312853
+    },
+    {
+      "name": "talkative-pillbug",
+      "state": "Completed",
+      "id": "1b42c3cc-4f78-47ac-9c34-060fade7d096",
+      "flow_id": "302829a4-b47c-4a5d-92ee-5c9d92f5d811",
+      "deployment_id": null,
+      "start_time": "2026-10-25T08:57:32.780419+00:00",
+      "total_run_time_s": 0.615537
+    },
+    {
+      "name": "zircon-cheetah",
+      "state": "Completed",
+      "id": "45268009-697c-4b82-bbf4-4f42b54184df",
+      "flow_id": "f20d1bbf-d530-48ba-aab8-ffca68bf58a8",
+      "deployment_id": null,
+      "start_time": "2026-10-25T08:57:30.629639+00:00",
+      "total_run_time_s": 1.054646
+    }
+  ],
+  "work_pools": [],
+  "run_statistics": {
+    "scope": "Sample of up to 200 runs for this project's flows; includes subflows",
+    "total_flow_runs_sampled": 69,
+    "runs_by_state": {
+      "Completed": 36,
+      "Failed": 2,
+      "Scheduled": 31
+    },
+    "n_flows": 3,
+    "n_deployments": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "python": "3.12.14",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "source_sha256": "09b367c85672de3db3bb76acc243bb41a27328fc2ba4e396e817375a63596dcd",
+  "requirements_lock_sha256": "b6a48ec05f6e727890cde331f624e2b5d380b54a407d820d1fe99ab9b93186d6",
+  "packages": {
+    "prefect": "3.8.8",
+    "pandas": "2.2.3",
+    "numpy": "2.3.5",
+    "scikit-learn": "1.9.1",
+    "fastapi": "0.139.0",
+    "sqlalchemy": "2.0.55"
+  }
+}

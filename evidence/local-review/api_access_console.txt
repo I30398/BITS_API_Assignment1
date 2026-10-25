@@ -1,0 +1,33 @@
+======================================================================
+PREFECT BUILT-IN API - KEY APPLICATION DETAILS
+Retrieved at: 2026-10-25T09:06:54.285092+00:00
+======================================================================
+
+[1] FLOWS (3)
+    - telco-assignment-workflow  (id=672fcf01...)
+    - telco-data-pipeline  (id=f20d1bbf...)
+    - telco-ml-pipeline  (id=302829a4...)
+
+[2] DEPLOYMENTS (1)
+    - telco-assignment-every-2min  | every 120s [active]  | tags=['assignment1', 'dataops', 'mlops']
+
+[3] RECENT FLOW RUNS (20)
+    - innocent-mouse               state=Completed    start=2026-10-25T09:05:33.420782+00:00
+    - handsome-pony                state=Completed    start=2026-10-25T09:05:31.170469+00:00
+    - screeching-toucanet          state=Completed    start=2026-10-25T09:05:31.090068+00:00
+    - jasper-smilodon              state=Completed    start=2026-10-25T09:03:32.578022+00:00
+    - celestial-cockatrice         state=Completed    start=2026-10-25T09:03:30.420606+00:00
+    - resilient-lizard             state=Completed    start=2026-10-25T09:03:30.333091+00:00
+    - uptight-horse                state=Completed    start=2026-10-25T09:01:34.288057+00:00
+    - apricot-boar                 state=Completed    start=2026-10-25T09:01:32.135139+00:00
+    - conscious-leech              state=Completed    start=2026-10-25T09:01:32.059210+00:00
+    - romantic-tamarin             state=Completed    start=2026-10-25T09:00:19.028956+00:00
+
+[4] WORK POOLS
+    No work pools: process-based serving is used.
+
+[5] RUN STATISTICS
+    flows=3  deployments=1  runs_sampled=69
+    runs_by_state={'Completed': 36, 'Failed': 2, 'Scheduled': 31}
+
+======================================================================

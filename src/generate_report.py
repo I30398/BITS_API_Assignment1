@@ -1,443 +1,275 @@
-"""
-Generate the Word submission document for CCZG506 Assignment I.
-
-Assembles explanations + the generated charts + dashboard screenshots + API
-output into a structured .docx mapped section-by-section to the rubric. Run
-AFTER both pipelines, the scheduled deployments, and src.api_access have run.
-
-Usage:  python -m src.generate_report
-Output: report/CCZG506_Assignment1_Report.docx
-"""
+"""Build a review or submission report from current implementation evidence."""
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
 import pandas as pd
 from docx import Document
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
 from src import config
-
-REPORT_DIR = config.PROJECT_ROOT / "report"
-DOC_PATH = REPORT_DIR / "CCZG506_Assignment1_Report.docx"
-ASSETS_DIR = config.PROJECT_ROOT / "assets"
-HEADER_LOGO = ASSETS_DIR / "header_bits_logo.png"
-FOOTER_BANNER = ASSETS_DIR / "footer_banner.png"
-
-ACCENT = RGBColor(0x2A, 0x78, 0xD6)
+from src.artifact_io import source_fingerprint
 
 
-def apply_header_footer(doc):
-    """Add the BITS Pilani logo header and innovate/achieve/lead footer banner
-    (extracted from the assignment template) to every page."""
-    section = doc.sections[0]
-
-    # Header - BITS Pilani logo, left-aligned (as in the template).
-    header = section.header
-    header.is_linked_to_previous = False
-    hp = header.paragraphs[0]
-    hp.text = ""
-    hp.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    if HEADER_LOGO.exists():
-        hp.add_run().add_picture(str(HEADER_LOGO), width=Inches(2.6))
-
-    # Footer - innovate/achieve/lead banner, right-aligned (as in the template).
-    footer = section.footer
-    footer.is_linked_to_previous = False
-    fp = footer.paragraphs[0]
-    fp.text = ""
-    fp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    if FOOTER_BANNER.exists():
-        fp.add_run().add_picture(str(FOOTER_BANNER), width=Inches(1.8))
+def read_json(path, default=None):
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
 
 
-def add_index(doc):
-    """Insert an auto-generated Table of Contents (Index) built from the
-    Heading 1/2 styles. Word fills in the entries and page numbers when the
-    document is opened (and fields are updated)."""
-    title = doc.add_paragraph()
-    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = title.add_run("Index")
-    r.bold = True
-    r.font.size = Pt(14)
-
-    p = doc.add_paragraph()
-    run = p.add_run()
-
-    fld_begin = OxmlElement("w:fldChar")
-    fld_begin.set(qn("w:fldCharType"), "begin")
-
-    instr = OxmlElement("w:instrText")
-    instr.set(qn("xml:space"), "preserve")
-    # \o "1-2" = headings 1..2, \h = hyperlinks, \z = hide tab leader in web,
-    # \u = use outline levels.
-    instr.text = 'TOC \\o "1-2" \\h \\z \\u'
-
-    fld_sep = OxmlElement("w:fldChar")
-    fld_sep.set(qn("w:fldCharType"), "separate")
-
-    placeholder_txt = OxmlElement("w:t")
-    placeholder_txt.text = ("Right-click here and choose 'Update Field' to "
-                            "build the Index (table of contents).")
-
-    fld_end = OxmlElement("w:fldChar")
-    fld_end.set(qn("w:fldCharType"), "end")
-
-    rpr = run._r
-    rpr.append(fld_begin)
-    rpr.append(instr)
-    rpr.append(fld_sep)
-    rpr.append(placeholder_txt)
-    rpr.append(fld_end)
-
-
-def set_update_fields_on_open(doc):
-    """Tell Word to refresh all fields (incl. the TOC) when the file opens,
-    so the Index populates without manual action."""
-    settings = doc.settings.element
-    upd = settings.find(qn("w:updateFields"))
-    if upd is None:
-        upd = OxmlElement("w:updateFields")
-        settings.append(upd)
-    upd.set(qn("w:val"), "true")
-
-
-# ---------------------------------------------------------------------------
-# helpers
-# ---------------------------------------------------------------------------
-def h(doc, text, level=1):
-    p = doc.add_heading(text, level=level)
-    return p
+def table(doc, columns, rows, widths=None):
+    result = doc.add_table(rows=1, cols=len(columns))
+    result.alignment = WD_TABLE_ALIGNMENT.CENTER
+    result.autofit = False
+    if widths is None:
+        widths = [6.5 / len(columns)] * len(columns)
+    for col, width in zip(result.columns, widths):
+        col.width = Inches(width)
+    for cell, title in zip(result.rows[0].cells, columns):
+        cell.text = title
+    for row in rows:
+        for cell, value in zip(result.add_row().cells, row):
+            cell.text = str(value)
+    repeat = OxmlElement("w:tblHeader")
+    result.rows[0]._tr.get_or_add_trPr().append(repeat)
+    for row_index, row in enumerate(result.rows):
+        row._tr.get_or_add_trPr().append(OxmlElement("w:cantSplit"))
+        for col_index, cell in enumerate(row.cells):
+            cell.width = Inches(widths[col_index])
+            cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+            props = cell._tc.get_or_add_tcPr()
+            borders = OxmlElement("w:tcBorders")
+            for edge in ["top", "left", "bottom", "right"]:
+                element = OxmlElement(f"w:{edge}")
+                for key, val in {"val": "single", "sz": "4", "color": "D9D9D9"}.items():
+                    element.set(qn(f"w:{key}"), val)
+                borders.append(element)
+            props.append(borders)
+            shading = OxmlElement("w:shd")
+            shading.set(qn("w:fill"), "243746" if row_index == 0 else
+                        ("F2F5F7" if row_index % 2 else "FFFFFF"))
+            props.append(shading)
+            margins = OxmlElement("w:tcMar")
+            for edge in ["top", "left", "bottom", "right"]:
+                element = OxmlElement(f"w:{edge}")
+                element.set(qn("w:w"), "85")
+                element.set(qn("w:type"), "dxa")
+                margins.append(element)
+            props.append(margins)
+            for paragraph in cell.paragraphs:
+                if row_index == 0:
+                    paragraph.paragraph_format.keep_with_next = True
+                paragraph.paragraph_format.space_after = Pt(3)
+                paragraph.paragraph_format.space_before = Pt(3)
+                for run in paragraph.runs:
+                    run.font.size = Pt(9)
+                    if row_index == 0:
+                        run.bold = True
+                        run.font.color.rgb = RGBColor(255, 255, 255)
+    doc.add_paragraph().paragraph_format.space_after = Pt(2)
+    return result
 
 
-def para(doc, text, italic=False, bold=False, size=11):
-    p = doc.add_paragraph()
-    run = p.add_run(text)
-    run.italic = italic
-    run.bold = bold
-    run.font.size = Pt(size)
-    return p
+def image(doc, path, caption, width=6.2):
+    if not path.exists():
+        return
+    paragraph = doc.add_paragraph()
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    paragraph.paragraph_format.keep_with_next = True
+    paragraph.add_run().add_picture(str(path), width=Inches(width))
+    caption_paragraph = doc.add_paragraph(caption)
+    caption_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    for run in caption_paragraph.runs:
+        run.italic = True
+        run.font.size = Pt(9)
 
 
-def placeholder(doc, text):
-    p = doc.add_paragraph()
-    run = p.add_run(f"[ SCREENSHOT: {text} ]")
-    run.bold = True
-    run.font.color.rgb = RGBColor(0xC9, 0x85, 0x00)
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    return p
+def validate_group(group):
+    import re
+    members = group.get("members", [])
+    if not group.get("group_id") or not 2 <= len(members) <= 6:
+        raise ValueError("Provide group_id and 2 to 6 actual members in config/group.json.")
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", group["group_id"]):
+        raise ValueError("Group ID must contain letters, digits, underscores or hyphens.")
+    for member in members:
+        if not all(member.get(k) for k in ["bits_id", "name", "contribution"]):
+            raise ValueError("Every member needs a BITS ID, name and qualitative contribution.")
+    if abs(sum(float(m.get("percentage", 0)) for m in members) - 100) > 0.001:
+        raise ValueError("Member contribution percentages must total 100.")
+    return group
 
 
-def add_image(doc, path: Path, width_in=6.0, caption=None):
-    if path.exists():
-        doc.add_picture(str(path), width=Inches(width_in))
-        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
-        if caption:
-            c = doc.add_paragraph()
-            run = c.add_run(caption)
-            run.italic = True
-            run.font.size = Pt(9)
-            c.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    else:
-        placeholder(doc, f"{caption or path.name} (missing: {path.name})")
-
-
-def add_table_from_df(doc, df: pd.DataFrame, max_rows=12, index_label=None):
-    df = df.head(max_rows).copy()
-    cols = ([index_label] if index_label else []) + list(df.columns)
-    table = doc.add_table(rows=1, cols=len(cols))
-    table.style = "Light Grid Accent 1"
-    for i, col in enumerate(cols):
-        table.rows[0].cells[i].text = str(col)
-    for idx, row in df.iterrows():
-        cells = table.add_row().cells
-        offset = 0
-        if index_label:
-            cells[0].text = str(idx)
-            offset = 1
-        for j, col in enumerate(df.columns):
-            val = row[col]
-            if isinstance(val, float):
-                val = f"{val:.4f}"
-            cells[j + offset].text = str(val)
-    return table
-
-
-def load_json(path: Path, default=None):
-    if path.exists():
-        return json.loads(path.read_text(encoding="utf-8"))
-    return default
-
-
-# ---------------------------------------------------------------------------
-# document
-# ---------------------------------------------------------------------------
-def build():
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+def build(draft=False, group_path=None):
+    group_path = group_path or config.PROJECT_ROOT / "config/group.json"
+    group = read_json(group_path, {})
+    metrics = read_json(config.MODELS_DIR / "latest_metrics.json")
+    run = read_json(config.OUTPUTS_DIR / "latest_run.json", {})
+    api = read_json(config.OUTPUTS_DIR / "api_details.json", {})
+    if not metrics:
+        raise ValueError("Run the revised workflow before generating a report.")
+    if metrics.get("source_sha256") != source_fingerprint():
+        raise ValueError("Current evidence was produced by different source code. Rerun the workflow.")
+    if not draft:
+        validate_group(group)
+        if not group.get("video_url"):
+            raise ValueError("Add the uploaded demonstration video's URL before final generation.")
+        if not group.get("cloud_evidence_confirmed"):
+            raise ValueError("Cloud hosting evidence is not confirmed. Use --draft for local review.")
+        for name in ["01_dashboard.png", "02_flow_runs.png", "03_deployments.png",
+                     "05_ml_run_logs.png", "06_data_run_logs.png"]:
+            if not (config.SCREENSHOTS_DIR / name).exists():
+                raise ValueError(f"Capture current dashboard evidence: {name}")
+        if api.get("source_sha256") != source_fingerprint():
+            raise ValueError("Capture fresh API details from the current implementation.")
     doc = Document()
-    apply_header_footer(doc)
-
-    # Title page ------------------------------------------------------------
-    t = doc.add_paragraph()
-    t.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = t.add_run("CCZG506 - API-driven Cloud Native Solutions\nAssignment I")
-    run.bold = True
-    run.font.size = Pt(22)
-    run.font.color.rgb = ACCENT
-
-    sub = doc.add_paragraph()
-    sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r2 = sub.add_run(
-        "Cloud-based Data Science / Machine Learning Application\n"
-        "Telecom Customer Churn Prediction\n"
-        "(Data Pipeline + ML Pipeline + API Access using Prefect)")
-    r2.font.size = Pt(13)
-
-    doc.add_paragraph()
-    para(doc, "Group No: __________", bold=True)
-    tbl = doc.add_table(rows=1, cols=4)
-    tbl.style = "Light Grid Accent 1"
-    for i, c in enumerate(["S.No", "BITS ID", "Name", "Contribution %"]):
-        tbl.rows[0].cells[i].text = c
-    for n in range(1, 4):
-        cells = tbl.add_row().cells
-        cells[0].text = str(n)
-
-    doc.add_page_break()
-
-    # Index / Table of Contents --------------------------------------------
-    add_index(doc)
-    doc.add_page_break()
-
-    # Overview --------------------------------------------------------------
-    h(doc, "1. Project Overview", 1)
-    para(doc,
-         "This project implements an end-to-end, cloud-native Data Science / "
-         "Machine Learning application for predicting telecom customer churn. "
-         "The solution is orchestrated with Prefect, which provides the flows, "
-         "scheduled deployments, a web dashboard (the cloud dashboard), and a "
-         "built-in REST API used for the API-access sub-objective.")
-    para(doc, "Technology stack:", bold=True)
-    for item in [
-        "Orchestration / dashboard / API: Prefect 3.8",
-        "Data & ML: pandas, NumPy, scikit-learn",
-        "Visualisation: matplotlib, seaborn",
-        "Dataset: IBM Telco Customer Churn (7,043 records, 21 columns)",
-    ]:
-        doc.add_paragraph(item, style="List Bullet")
-
-    # ---- Sub-Objective 1 --------------------------------------------------
-    h(doc, "2. Sub-Objective 1 - Data Pipeline (8 marks)", 1)
-
-    h(doc, "1.1 Business Understanding", 2)
-    para(doc,
-         "Customer churn - customers discontinuing their subscription - is a "
-         "major revenue risk for telecom operators, since acquiring a new "
-         "customer costs far more than retaining an existing one. The business "
-         "problem is: given a customer's demographics, account, and service "
-         "usage attributes, predict whether the customer will churn, so the "
-         "retention team can target high-risk customers proactively. This is a "
-         "binary classification problem.")
-
-    h(doc, "1.2 Data Ingestion", 2)
-    para(doc,
-         "The dataset is the public IBM Telco Customer Churn dataset (also "
-         "distributed on Kaggle), with 7,043 records and 21 columns covering "
-         "demographics (gender, SeniorCitizen, Partner, Dependents), account "
-         "information (tenure, Contract, PaymentMethod, charges), and subscribed "
-         "services. The target column is 'Churn' (Yes/No). The data pipeline's "
-         "ingest task loads this CSV, with retries configured for resilience.")
-    add_image(doc, config.EDA_DIR / "univariate_churn_distribution.png", 4.5,
-              "Target class balance: 5,174 'No' vs 1,869 'Yes' (ingested data).")
-
-    h(doc, "1.3 Data Pre-processing", 2)
-    para(doc, "The following pre-processing activities are automated as Prefect "
-              "tasks:")
-    for item in [
-        "Summary statistics via describe() on numeric features.",
-        "Data types captured for every column.",
-        "Missing-value check before and after processing.",
-        "Inducing missing data: 5% of values in each numeric column "
-        "(tenure, MonthlyCharges, TotalCharges) are randomly set to NaN to "
-        "simulate dirty data.",
-        "Imputation of numeric NaNs with the column median.",
-        "Normalisation: Min-Max scaling of numeric columns to [0, 1].",
-    ]:
-        doc.add_paragraph(item, style="List Bullet")
-
-    stats_path = config.OUTPUTS_DIR / "summary_statistics.csv"
-    if stats_path.exists():
-        para(doc, "Summary statistics (numeric features):", bold=True)
-        sdf = pd.read_csv(stats_path, index_col=0)
-        add_table_from_df(doc, sdf.round(2), index_label="feature")
-
-    norm_path = config.OUTPUTS_DIR / "normalisation_preview.csv"
-    if norm_path.exists():
-        para(doc, "Normalisation preview (original vs _norm columns):", bold=True)
-        add_table_from_df(doc, pd.read_csv(norm_path), max_rows=5)
-    add_image(doc, config.PROJECT_ROOT / "outputs/screenshots/06_data_run_logs.png",
-              6.5, "Data-pipeline run on the dashboard - the [1.3-*] log lines show "
-              "summary stats, data types, the missing-value check, the induced "
-              "missing data (352 cells per numeric column), median imputation and "
-              "Min-Max normalisation.")
-
-    h(doc, "1.4 Exploratory Data Analysis (EDA)", 2)
-    para(doc, "EDA activities, all automated inside the data pipeline:")
-    for item in [
-        "Correlation coefficients across all (encoded) features.",
-        "Correlation of numeric & categorical features with churn.",
-        "Binning: 'tenure' grouped into bands (0-1 yr ... 5+ yr).",
-        "Encoding: label-encoding of categorical features.",
-        "Feature importance via a Random Forest.",
-        "Univariate & bivariate visualisations.",
-    ]:
-        doc.add_paragraph(item, style="List Bullet")
-
-    add_image(doc, config.EDA_DIR / "correlation_heatmap.png", 6.0,
-              "Correlation matrix across all encoded features (diverging palette).")
-    add_image(doc, config.EDA_DIR / "feature_importance.png", 6.0,
-              "Random-Forest feature importance (top features w.r.t. churn).")
-    add_image(doc, config.EDA_DIR / "univariate_tenure_histogram.png", 5.0,
-              "Univariate analysis: distribution of customer tenure.")
-    add_image(doc, config.EDA_DIR / "bivariate_churn_by_contract.png", 5.5,
-              "Bivariate analysis: churn rate by contract type "
-              "(month-to-month customers churn far more).")
-    add_image(doc, config.EDA_DIR / "bivariate_charges_by_churn.png", 5.5,
-              "Bivariate analysis: monthly charges by churn outcome.")
-
-    h(doc, "1.5 DataOps - Automation, Scheduling & Dashboard", 2)
-    para(doc,
-         "Steps 1.3 and 1.4 are implemented as tasks inside a single Prefect "
-         "flow (telco-data-pipeline). The flow is served as a deployment with "
-         "an interval schedule of 2 minutes, so it runs automatically every 2 "
-         "minutes. Every task logs its activity both to the Prefect dashboard "
-         "and to a JSON-lines activity log. The screenshots below show the "
-         "scheduled runs on the Prefect cloud dashboard.")
-    add_image(doc, config.PROJECT_ROOT / "outputs/screenshots/02_flow_runs.png",
-              6.5, "Prefect dashboard - flow runs auto-scheduled every 2 minutes "
-              "(note the 'auto-scheduled' tag and 2-minute spacing).")
-    add_image(doc, config.PROJECT_ROOT / "outputs/screenshots/03_deployments.png",
-              6.5, "Prefect dashboard - the two deployments with their schedules.")
-    add_image(doc, config.PROJECT_ROOT / "outputs/screenshots/01_dashboard.png",
-              6.5, "Prefect main dashboard overview.")
-    add_image(doc, config.PROJECT_ROOT / "outputs/screenshots/06_data_run_logs.png",
-              6.5, "A single telco-data-pipeline run opened on the dashboard - the "
-              "task run graph and the per-task activity logs for steps 1.3 and 1.4.")
-
-    # ---- Sub-Objective 2 --------------------------------------------------
-    h(doc, "3. Sub-Objective 2 - Machine Learning Pipeline (5 marks)", 1)
-
-    h(doc, "2.1 Model Preparation", 2)
-    para(doc,
-         "Churn prediction is a binary classification task. Two complementary "
-         "algorithms were selected: (1) Logistic Regression - a fast, "
-         "interpretable linear baseline, and (2) Random Forest - a non-linear "
-         "ensemble that captures feature interactions. Features are label-"
-         "encoded; Logistic Regression additionally standardises features in a "
-         "scikit-learn pipeline.")
-
-    h(doc, "2.2 Model Training", 2)
-    para(doc,
-         "The cleaned dataset is split 70% train / 30% test using a stratified "
-         "split (preserving the churn ratio) with a fixed random seed for "
-         "reproducibility. Both models are trained on the training set.")
-
-    h(doc, "2.3 Model Evaluation", 2)
-    metrics = load_json(config.MODELS_DIR / "latest_metrics.json")
-    if metrics:
-        para(doc, "Evaluation on the 30% hold-out test set:", bold=True)
-        mdf = pd.DataFrame(metrics["models"])[
-            ["model", "accuracy", "precision", "recall", "f1_score", "roc_auc"]
-        ]
-        add_table_from_df(doc, mdf)
-        para(doc,
-             f"Best model by F1-score: {metrics['best']['model']} "
-             f"(F1 = {metrics['best']['f1_score']}, "
-             f"accuracy = {metrics['best']['accuracy']}).")
-    add_image(doc, config.MODELS_DIR / "model_comparison.png", 6.0,
-              "Model evaluation metrics for both algorithms.")
-    add_image(doc, config.MODELS_DIR / "confusion_matrices.png", 6.0,
-              "Confusion matrices on the hold-out test set.")
-
-    h(doc, "2.4 MLOps - Monitoring & Metric Logging", 2)
-    para(doc,
-         "The ML pipeline (telco-ml-pipeline) is also a scheduled Prefect "
-         "deployment running every 2 minutes. For every run it logs at least "
-         "four metrics - accuracy, precision, recall, F1-score and ROC-AUC - to "
-         "the dashboard and appends them to a metrics-history CSV so model "
-         "performance can be monitored for drift over time.")
-    add_image(doc, config.PROJECT_ROOT / "outputs/screenshots/05_ml_run_logs.png",
-              6.5, "A completed telco-ml-pipeline run on the dashboard - the task "
-              "graph plus the [2.4-mlops] log lines recording accuracy, precision, "
-              "recall, F1-score and ROC-AUC for both models.")
-
-    # ---- Sub-Objective 3 --------------------------------------------------
-    h(doc, "4. Sub-Objective 3 - API Access (2 marks)", 1)
-    para(doc,
-         "Key application details are retrieved programmatically using "
-         "Prefect's built-in REST API (via the official Python client). The "
-         "script src/api_access.py retrieves and displays the following "
-         "application details:")
-    api = load_json(config.OUTPUTS_DIR / "api_details.json")
-    if api:
-        for item in [
-            f"Flows registered: {len(api.get('flows', []))}",
-            f"Deployments (with schedules): {len(api.get('deployments', []))}",
-            f"Recent flow runs and their states: "
-            f"{len(api.get('recent_flow_runs', []))} shown",
-            f"Run statistics: {api.get('run_statistics', {})}",
-        ]:
-            doc.add_paragraph(item, style="List Bullet")
-
-        para(doc, "Deployments retrieved via API:", bold=True)
-        ddf = pd.DataFrame([
-            {"name": d["name"], "paused": d["paused"],
-             "schedule": ", ".join(
-                 f"every {int(s['interval_seconds'])}s"
-                 for s in d["schedules"] if s.get("interval_seconds")),
-             "tags": ", ".join(d["tags"])}
-            for d in api.get("deployments", [])
-        ])
-        if not ddf.empty:
-            add_table_from_df(doc, ddf)
-
-        para(doc, "Recent flow runs retrieved via API:", bold=True)
-        rdf = pd.DataFrame(api.get("recent_flow_runs", []))
-        if not rdf.empty:
-            add_table_from_df(doc, rdf, max_rows=10)
-
-    para(doc, "Console output of src/api_access.py:", bold=True)
-    console = config.OUTPUTS_DIR / "api_access_console.txt"
-    if console.exists():
-        mono = doc.add_paragraph()
-        run = mono.add_run(console.read_text(encoding="utf-8"))
-        run.font.name = "Consolas"
-        run.font.size = Pt(8)
-    para(doc, "(The full console output above is the live result of running "
-              "python -m src.api_access against the Prefect API.)", italic=True,
-         size=9)
-
-    # ---- Appendix ---------------------------------------------------------
-    h(doc, "5. How to Run (Appendix)", 1)
-    for step in [
-        "pip install -r requirements.txt",
-        "Terminal 1:  prefect server start   (dashboard at http://127.0.0.1:4200)",
-        "Terminal 2:  set PREFECT_API_URL=http://127.0.0.1:4200/api",
-        "             python -m src.data_pipeline    (run data pipeline once)",
-        "             python -m src.ml_pipeline       (run ML pipeline once)",
-        "             python -m src.deploy            (schedule both every 2 min)",
-        "             python -m src.api_access        (retrieve API details)",
-    ]:
-        doc.add_paragraph(step, style="List Number")
-
-    set_update_fields_on_open(doc)
-    doc.save(DOC_PATH)
-    print(f"Report written to: {DOC_PATH}")
+    # The bundled Word template may carry a blue rule beneath its Title style.
+    for root in [doc.styles.element, doc.element]:
+        for border in root.xpath(".//w:pBdr"):
+            border.getparent().remove(border)
+    section = doc.sections[0]
+    section.page_width, section.page_height = Inches(8.5), Inches(11)
+    section.top_margin = section.bottom_margin = Inches(0.7)
+    section.left_margin = section.right_margin = Inches(1)
+    for name in ["Normal", "Title", "Subtitle", "Heading 1", "Heading 2"]:
+        style = doc.styles[name]
+        style.font.name = "Calibri"
+        style.font.color.rgb = RGBColor(0, 0, 0)
+    normal = doc.styles["Normal"]
+    normal.font.size = Pt(11)
+    normal.paragraph_format.space_after = Pt(7)
+    normal.paragraph_format.line_spacing = 1.08
+    for name in ["Heading 1", "Heading 2"]:
+        doc.styles[name].paragraph_format.keep_with_next = True
+    doc.add_paragraph("Telecom Customer Churn Prediction", "Title")
+    doc.add_paragraph("CCZG506 API driven Cloud Native Solutions", "Subtitle")
+    doc.add_paragraph("Assignment I" + (" review copy" if draft else ""))
+    doc.add_paragraph(
+        "This project identifies customers at risk of leaving a telecom service. "
+        "A scheduled Prefect workflow performs data preparation and exploration, "
+        "then trains and evaluates two classifiers. Prefect APIs expose the "
+        "application's flows, deployments and execution details.")
+    doc.add_paragraph(f"Group number: {group.get('group_id', '________________')}")
+    members = group.get("members") or [{"bits_id": "", "name": "", "contribution": "", "percentage": ""} for _ in range(2)]
+    table(doc, ["BITS ID", "Name", "Contribution", "%"],
+          [[m.get(k, "") for k in ["bits_id", "name", "contribution", "percentage"]] for m in members],
+          [1.1, 1.3, 3.6, 0.5])
+    doc.add_paragraph("Execution and evidence", "Heading 1")
+    doc.add_paragraph(f"Execution environment: {run.get('environment', 'local')}. "
+        f"Latest completed cycle: {run.get('completed_at', 'not captured')}. "
+        "The original repository outputs are retained separately from these results.")
+    if not group.get("cloud_evidence_confirmed"):
+        doc.add_paragraph("The evidence in this review demonstrates local execution. "
+                          "Cloud hosting has not yet been demonstrated.")
+    doc.add_paragraph("1 Data pipeline", "Heading 1")
+    doc.add_paragraph("1.1 Business understanding and data ingestion", "Heading 2")
+    doc.add_paragraph("The business objective is to support retention decisions by predicting "
+        "customer churn from account, service and demographic attributes. The public IBM "
+        "Telco Customer Churn dataset contains 7043 records and 21 columns. Churn is a "
+        "binary Yes or No target; customerID is excluded from model features.")
+    doc.add_paragraph(f"Dataset source: {config.DATASET_URL}")
+    image(doc, config.EDA_DIR / "univariate_churn_distribution.png", "Figure 1 Customer churn class balance", 4.5)
+    doc.add_paragraph("1.2 Preprocessing", "Heading 2")
+    doc.add_paragraph("The workflow coerces TotalCharges to numeric, identifies missing values, "
+        "and induces 352 missing entries in each of tenure, MonthlyCharges and TotalCharges "
+        "using a fixed random seed. Full-data EDA uses median imputation and Min-Max "
+        "normalisation. The pre-imputation snapshot is passed separately to ML so that "
+        "test records cannot influence training preprocessing.")
+    stats = pd.read_csv(config.OUTPUTS_DIR / "summary_statistics.csv", index_col=0)
+    table(doc, ["Feature", "Count", "Mean", "Std", "Min", "Max"],
+          [[idx, int(row['count']), *[f"{row[k]:.2f}" for k in ['mean', 'std', 'min', 'max']]]
+           for idx, row in stats.iterrows()], [1.45, 0.7, 1.1, 1.1, 1.0, 1.15])
+    types = pd.read_csv(config.OUTPUTS_DIR / "data_types.csv")
+    table(doc, ["Column", "Data type"], types.values.tolist(), [4.3, 2.2])
+    preview = pd.read_csv(config.OUTPUTS_DIR / "normalisation_preview.csv")
+    table(doc, ["Numeric feature", "Original example", "Normalised example"],
+          [[c, f"{preview.iloc[0][c]:.2f}", f"{preview.iloc[0][c + '_norm']:.4f}"]
+           for c in config.NUMERIC_COLUMNS], [2.5, 2, 2])
+    doc.add_paragraph("1.3 Exploratory data analysis", "Heading 2")
+    doc.add_paragraph("Tenure is binned into five bands. Encoding mappings and bin counts "
+        "are saved. Pearson coefficients are calculated for numeric features and the binary "
+        "target. Cramer's V measures categorical association without assuming an ordering "
+        "between category codes. Random Forest exploratory importance is aggregated "
+        "from one-hot category levels, using each original numeric feature once.")
+    assoc = pd.read_csv(config.OUTPUTS_DIR / "categorical_associations.csv").head(6)
+    table(doc, ["Categorical feature", "Association with churn"],
+          [[row.feature, f"{row.cramers_v:.3f}"] for row in assoc.itertuples()], [3.5, 3])
+    for name, caption in [
+        ("correlation_heatmap.png", "Figure 2 Numeric correlations"),
+        ("feature_importance.png", "Figure 3 Exploratory feature importance"),
+        ("univariate_tenure_histogram.png", "Figure 4 Univariate tenure distribution"),
+        ("bivariate_churn_by_contract.png", "Figure 5 Churn rate by contract"),
+        ("bivariate_charges_by_churn.png", "Figure 6 Charges by churn outcome")]:
+        image(doc, config.EDA_DIR / name, caption, 5.5)
+    doc.add_paragraph("1.4 DataOps scheduling and monitoring", "Heading 2")
+    doc.add_paragraph("One deployment runs every 120 seconds with concurrency limited to "
+        "one cycle. DataOps completes before MLOps starts. Complete files are published by "
+        "atomic replacement, and cross-process locks protect appended logs. Every task "
+        "records its activity in the Prefect dashboard and JSONL logs; result tables are "
+        "also available as Prefect artifacts.")
+    for name, caption in [("03_deployments.png", "Figure 7 Deployment interval and status"),
+                          ("02_flow_runs.png", "Figure 8 Scheduled execution history"),
+                          ("06_data_run_logs.png", "Figure 9 Data preparation activity logs")]:
+        image(doc, config.SCREENSHOTS_DIR / name, caption)
+    doc.add_paragraph("2 Machine learning pipeline", "Heading 1")
+    doc.add_paragraph("2.1 Preparation training and evaluation", "Heading 2")
+    doc.add_paragraph("Logistic Regression provides a linear baseline; Random Forest "
+        "captures non-linear relationships. A stratified 70/30 split produces 4930 "
+        "training records and 2113 test records. Each model contains its own fitted "
+        "preprocessing pipeline: numeric median imputation and standardisation, plus "
+        "categorical imputation and one-hot encoding. All fitted parameters are learned "
+        "from training records. Test records are transformed without refitting.")
+    table(doc, ["Model", "Accuracy", "Precision", "Recall", "F1", "ROC AUC"],
+          [[m['model'], *[f"{m[k]:.4f}" for k in ['accuracy', 'precision', 'recall', 'f1_score', 'roc_auc']]]
+           for m in metrics['models']], [1.6, .98, .98, .98, .98, .98])
+    image(doc, config.MODELS_DIR / "model_comparison.png", "Figure 10 Five metrics for each model")
+    image(doc, config.MODELS_DIR / "confusion_matrices.png", "Figure 11 Holdout confusion matrices")
+    doc.add_paragraph("2.2 MLOps and interpretation", "Heading 2")
+    doc.add_paragraph("Every cycle records accuracy, precision, recall, F1 and ROC AUC "
+        "for both models. The metrics history records timestamps, pipeline version and "
+        "source fingerprint. Repeating evaluation on this fixed dataset demonstrates "
+        "monitoring and logging; it does not establish drift detection or performance "
+        "on a changing production population. Recall measures the proportion of actual "
+        "churners identified, while precision measures how many flagged customers churn.")
+    image(doc, config.SCREENSHOTS_DIR / "05_ml_run_logs.png", "Figure 12 ML task logs and metrics")
+    doc.add_paragraph("3 API access", "Heading 1")
+    doc.add_paragraph("The official Prefect client retrieves details through built-in APIs. "
+        "Project filters keep unrelated flows out of the evidence. The saved response "
+        "contains registered flows, deployment schedules and concurrency, recent run "
+        "states, start times and durations. Aggregate statistics describe a bounded "
+        "sample of up to 200 project runs and include child flows.")
+    table(doc, ["Detail", "Retrieved value"], [
+        ["Retrieved at", api.get('retrieved_at', 'Not captured')],
+        ["Project flows", ', '.join(f['name'] for f in api.get('flows', []))],
+        ["Deployments", ', '.join(d['name'] for d in api.get('deployments', []))],
+        ["Recent executed runs", len(api.get('recent_flow_runs', []))],
+        ["Sampled run states", str(api.get('run_statistics', {}).get('runs_by_state', {}))],
+    ], [1.7, 4.8])
+    image(doc, config.SCREENSHOTS_DIR / "01_dashboard.png", "Figure 13 Dashboard overview")
+    doc.add_paragraph("4 Reproduction and demonstration", "Heading 1")
+    doc.add_paragraph("Follow README.md for the tested Python 3.12 setup, local server "
+        "and scheduled workflow. The local dashboard is at http://127.0.0.1:4207. "
+        "Run python -m src.api_access to capture current API details. The Docker Compose "
+        "package provides the same server and runner arrangement for local or cloud VM "
+        "execution; selecting cloud configuration alone is not proof of deployment.")
+    if group.get("video_url"):
+        doc.add_paragraph("Demonstration video: " + group['video_url'])
+    doc.add_paragraph("Dataset SHA256: " + metrics['raw_dataset_sha256'])
+    output_dir = config.PROJECT_ROOT / "report/current"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    name = "CCZG506_Assignment1_Review.docx" if draft else group['group_id'] + '.docx'
+    output = output_dir / name
+    doc.save(output)
+    print(output)
+    return output
 
 
 if __name__ == "__main__":
-    build()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--draft", action="store_true", help="Generate a local review with incomplete submission details.")
+    parser.add_argument("--group", type=Path)
+    args = parser.parse_args()
+    build(args.draft, args.group)

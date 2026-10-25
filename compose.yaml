@@ -1,0 +1,32 @@
+name: cczg506-assignment1
+services:
+  server:
+    build: .
+    image: cczg506-assignment1:local
+    command: ["python", "-m", "prefect", "server", "start", "--host", "0.0.0.0", "--port", "4200"]
+    environment:
+      PREFECT_UI_API_URL: ${PREFECT_UI_API_URL:-http://127.0.0.1:4207/api}
+    ports:
+      - "127.0.0.1:4207:4200"
+    volumes:
+      - prefect-data:/var/lib/prefect
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4200/api/health', timeout=5)"]
+      interval: 10s
+      timeout: 7s
+      retries: 12
+    restart: unless-stopped
+  runner:
+    image: cczg506-assignment1:local
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      PREFECT_API_URL: http://server:4200/api
+      ASSIGNMENT_ENVIRONMENT: ${ASSIGNMENT_ENVIRONMENT:-local}
+    volumes:
+      - application-outputs:/app/outputs/current
+    restart: unless-stopped
+volumes:
+  prefect-data:
+  application-outputs:

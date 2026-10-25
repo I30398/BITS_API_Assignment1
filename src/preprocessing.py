@@ -69,6 +69,7 @@ def induce_missing(
     df = df.copy()
     induced: dict[str, int] = {}
     for col in config.NUMERIC_COLUMNS:
+        df[col] = df[col].astype(float)
         n = int(len(df) * fraction)
         idx = rng.choice(df.index, size=n, replace=False)
         df.loc[idx, col] = np.nan

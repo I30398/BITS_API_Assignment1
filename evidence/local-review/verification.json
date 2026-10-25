@@ -1,0 +1,168 @@
+{
+  "verified_at": "2026-10-25T09:06:54.398195+00:00",
+  "source_sha256": "09b367c85672de3db3bb76acc243bb41a27328fc2ba4e396e817375a63596dcd",
+  "environment": "local",
+  "cloud_deployment_verified": false,
+  "checks": {
+    "current_source_matches_metrics": true,
+    "train_only_preprocessing": true,
+    "split_4930_2113": true,
+    "two_models_five_metrics": true,
+    "no_duplicate_normalised_model_features": true,
+    "id_and_target_excluded": true,
+    "missing_values_retained_for_train_only_imputation": true,
+    "clean_eda_no_missing_values": true,
+    "eda_normalisation_bounds": true,
+    "data_pipeline.jsonl_valid_with_context": true,
+    "ml_pipeline.jsonl_valid_with_context": true,
+    "project_flows_retrieved": true,
+    "deployment_interval_120_concurrency_one": true,
+    "at_least_two_scheduled_completed_cycles": true
+  },
+  "scheduled_parent_runs": [
+    {
+      "id": "01a1723e-5d3a-7095-a298-3b60f7ecab91",
+      "name": "conscious-leech",
+      "start_time": "2026-10-25T09:01:32.059210+00:00",
+      "deployment_id": "f4384b14-e9cb-4aea-93fb-2c809f50e4f0"
+    },
+    {
+      "id": "01a1723e-5d3a-7173-823e-7917c65f5c52",
+      "name": "resilient-lizard",
+      "start_time": "2026-10-25T09:03:30.333091+00:00",
+      "deployment_id": "f4384b14-e9cb-4aea-93fb-2c809f50e4f0"
+    },
+    {
+      "id": "01a1723e-5d3a-75ed-949e-8e2a08d09a83",
+      "name": "screeching-toucanet",
+      "start_time": "2026-10-25T09:05:31.090068+00:00",
+      "deployment_id": "f4384b14-e9cb-4aea-93fb-2c809f50e4f0"
+    }
+  ],
+  "files": [
+    {
+      "path": "categorical_associations.csv",
+      "sha256": "f9e78faf8375fd673f23ca8646fd1689f58f293533755a0c0f4493bfffe64432"
+    },
+    {
+      "path": "correlation_matrix.csv",
+      "sha256": "5c61f82ff752b5f50f67cb632b76e1136043e19c1a90c7f64df4ab77fd8d3697"
+    },
+    {
+      "path": "data/telco_churn_clean.csv",
+      "sha256": "0cba978935e679af5d68bd204ce495cebfb599407476c6d6ac48d0d72222888a"
+    },
+    {
+      "path": "data/telco_churn_model_input.csv",
+      "sha256": "360970b11d36dcea258892da5cc4ab8da33afc608fcb2a4a3d7046f577b1d0c3"
+    },
+    {
+      "path": "data_types.csv",
+      "sha256": "e96628f8a76bbbf21d7a8253813a43d37d31d5c7612b4c20a3136de99721ef8d"
+    },
+    {
+      "path": "eda/bivariate_charges_by_churn.png",
+      "sha256": "888adb5cf2b05bd73e87c1e87cd5e95b1a04b0346044008d53b3a89a76cfa7ba"
+    },
+    {
+      "path": "eda/bivariate_churn_by_contract.png",
+      "sha256": "ad66ab9961397f20886f977c9bff5912f4bd5259e774f7910f733b7c2f7d738f"
+    },
+    {
+      "path": "eda/correlation_heatmap.png",
+      "sha256": "654448a31aef4700f112e160ed8a0c1ad135f7b211dadb0b389fddbdaa720b3b"
+    },
+    {
+      "path": "eda/feature_importance.png",
+      "sha256": "dfe9c6d2bb01ed50027c72e88618e45397edcbcc276e9eb8211d1b4d43b6469d"
+    },
+    {
+      "path": "eda/univariate_churn_distribution.png",
+      "sha256": "e8cdf2cee163c3e1555b2a5f9454b0969a6f213bb7971d9e069146d11ef31f19"
+    },
+    {
+      "path": "eda/univariate_tenure_histogram.png",
+      "sha256": "00988504f52175ce0119d053052554981a5af2f83d1a1ed31cf78928b94f6351"
+    },
+    {
+      "path": "feature_importance.csv",
+      "sha256": "d656d63a0b9f94247ad0b1dde26498a3846d0022e6869846a75f073496d18fdc"
+    },
+    {
+      "path": "logs/data_pipeline.jsonl",
+      "sha256": "4e95ea1837b7934eea6154be678fdc767fc65c7d3908dac28c910ce41d697fb3"
+    },
+    {
+      "path": "logs/ml_pipeline.jsonl",
+      "sha256": "7d56d2de5a50220e34618be6e1ec8e086e1c188a12ee101dddd4dfa49a1f1c6c"
+    },
+    {
+      "path": "logs/workflow_history.jsonl",
+      "sha256": "03f7a3e3f1c81ef1d8c5978a9a23a1a4e4df591bacb31b8c0a4b9c6834523247"
+    },
+    {
+      "path": "missing_after_induction.csv",
+      "sha256": "1bde74d16412cf56f6d33c756ce64568c024a523e6646ec34211da4856f8dd74"
+    },
+    {
+      "path": "missing_before.csv",
+      "sha256": "734c37acaf86299b489a537c1d2d3e074748f4c0ee9f5bf9bbbc247dbc6f312b"
+    },
+    {
+      "path": "models/confusion_matrices.png",
+      "sha256": "04fdd6175ee030d08cc7083ccc2268b161089b651c1a49cb0ae2279e1fbf3b35"
+    },
+    {
+      "path": "models/logistic_regression.pkl",
+      "sha256": "7b22b4c39406cce9d15f9e3d9487a3a1519dc7a18ad894d637a773b27e1b4dc8"
+    },
+    {
+      "path": "models/metrics_history.csv",
+      "sha256": "6a95be987cb9989acb27c6f75fde6ebc617b6fe02c37dff623c6dd7791a1e3cd"
+    },
+    {
+      "path": "models/model_comparison.png",
+      "sha256": "0a8513a34c53ae5fff0cff7db8d2609b4d6998d0d1521b7a91faba71c69146cd"
+    },
+    {
+      "path": "models/random_forest.pkl",
+      "sha256": "41ec48ee436a81d328141b9f1704162a6afc683f9e165dc5045869fd4893e4ea"
+    },
+    {
+      "path": "normalisation_preview.csv",
+      "sha256": "d1fe12131753896c19cfeddf3c12ca0ae428c97605d9b058834203e234d3589e"
+    },
+    {
+      "path": "screenshots/01_dashboard.png",
+      "sha256": "cd46fa406cca55cb4e5dd52881ebe442ccf2733d918f1488a76c84565ea079f3"
+    },
+    {
+      "path": "screenshots/02_flow_runs.png",
+      "sha256": "dab146c4f630bfbd404ba77171b74e1d6ef0e2539d290b57c910cda2a6c82d4c"
+    },
+    {
+      "path": "screenshots/03_deployments.png",
+      "sha256": "13c2db491d82dde9b7cd43fdbc1ccd9f26c8aca479216f01e980c79b66ef74cb"
+    },
+    {
+      "path": "screenshots/05_ml_run_logs.png",
+      "sha256": "31602d9af0d8208661f1a222ab3751e0fcf17c32395ec7c8e10ab00348a25ca5"
+    },
+    {
+      "path": "screenshots/06_data_run_logs.png",
+      "sha256": "e3251dbac54117c0ccc41348900bcb83e13d766e6b3ad7639a706a563d8a2873"
+    },
+    {
+      "path": "screenshots/07_artifacts.png",
+      "sha256": "6705b290a443d58dad14105a1b297a72fca878e861f95fabd8fb6031b0139f0a"
+    },
+    {
+      "path": "summary_statistics.csv",
+      "sha256": "d3550a6e8132fcf1b6e2d6c1e77023417d1985d2e27efe9c7689ba46891315d1"
+    },
+    {
+      "path": "tenure_bins.csv",
+      "sha256": "3ef30d045c31dcecde341506396e9e9f028e6789455700fdf42d1422eca4f3aa"
+    }
+  ]
+}

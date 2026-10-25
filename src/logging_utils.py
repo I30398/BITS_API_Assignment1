@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from src import config
+from src.artifact_io import append_record
 
 
 def _timestamp() -> str:
@@ -26,11 +27,21 @@ def log_activity(logfile: str, step: str, message: str, **fields) -> dict:
     Returns the record so callers can also push it to the Prefect logger.
     """
     config.ensure_dirs()
-    record = {"ts": _timestamp(), "step": step, "message": message}
+    record = {"ts": _timestamp(), "step": step, "message": message,
+              "pipeline_version": config.PIPELINE_VERSION}
+    try:
+        from prefect.context import get_run_context
+        context = get_run_context()
+        if hasattr(context, "task_run"):
+            record["flow_run_id"] = str(context.task_run.flow_run_id)
+            record["task_run_id"] = str(context.task_run.id)
+        elif hasattr(context, "flow_run"):
+            record["flow_run_id"] = str(context.flow_run.id)
+    except RuntimeError:
+        pass
     record.update(fields)
     path = config.LOGS_DIR / logfile
-    with path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(record) + "\n")
+    append_record(path, record)
     return record
 
 

@@ -25,13 +25,18 @@ from datetime import datetime, timezone
 from prefect.client.orchestration import get_client
 
 from src import config
+from src.artifact_io import atomic_path, write_json, source_fingerprint
+from prefect.client.schemas.filters import FlowFilter, FlowFilterName
 
 
 async def _gather() -> dict:
-    details: dict = {"retrieved_at": datetime.now(timezone.utc).isoformat()}
+    details: dict = {"retrieved_at": datetime.now(timezone.utc).isoformat(),
+                    "source_sha256": source_fingerprint(),
+                    "pipeline_version": config.PIPELINE_VERSION}
+    project_filter = FlowFilter(name=FlowFilterName(any_=config.FLOW_NAMES))
     async with get_client() as client:
         # Detail 1 - Flows
-        flows = await client.read_flows()
+        flows = await client.read_flows(flow_filter=project_filter)
         details["flows"] = [
             {"name": f.name, "id": str(f.id),
              "created": f.created.isoformat() if f.created else None}
@@ -39,7 +44,7 @@ async def _gather() -> dict:
         ]
 
         # Detail 2 - Deployments + schedules
-        deployments = await client.read_deployments()
+        deployments = await client.read_deployments(flow_filter=project_filter)
         dep_list = []
         for d in deployments:
             schedules = []
@@ -55,6 +60,8 @@ async def _gather() -> dict:
                 "name": d.name,
                 "id": str(d.id),
                 "paused": d.paused,
+                "concurrency_limit": d.global_concurrency_limit.limit
+                if d.global_concurrency_limit else None,
                 "tags": d.tags,
                 "schedules": schedules,
             })
@@ -75,12 +82,15 @@ async def _gather() -> dict:
             )
         )
         runs = await client.read_flow_runs(
-            limit=10, flow_run_filter=executed_filter,
+            limit=20, flow_run_filter=executed_filter, flow_filter=project_filter,
             sort=FlowRunSort.START_TIME_DESC,
         )
         details["recent_flow_runs"] = [
             {"name": r.name,
              "state": r.state_name,
+             "id": str(r.id),
+             "flow_id": str(r.flow_id),
+             "deployment_id": str(r.deployment_id) if r.deployment_id else None,
              "start_time": r.start_time.isoformat() if r.start_time else None,
              "total_run_time_s": r.total_run_time.total_seconds()
              if r.total_run_time else None}
@@ -98,12 +108,13 @@ async def _gather() -> dict:
             details["work_pools"] = {"note": f"unavailable: {exc}"}
 
         # Detail 5 - Aggregate run statistics (derived)
-        all_runs = await client.read_flow_runs(limit=200)
+        all_runs = await client.read_flow_runs(limit=200, flow_filter=project_filter)
         by_state: dict[str, int] = {}
         for r in all_runs:
             by_state[r.state_name or "Unknown"] = \
                 by_state.get(r.state_name or "Unknown", 0) + 1
         details["run_statistics"] = {
+            "scope": "Sample of up to 200 runs for this project's flows; includes subflows",
             "total_flow_runs_sampled": len(all_runs),
             "runs_by_state": by_state,
             "n_flows": len(details["flows"]),
@@ -126,8 +137,8 @@ def _print_report(d: dict) -> None:
     print(f"\n[2] DEPLOYMENTS ({len(d['deployments'])})")
     for dep in d["deployments"]:
         scheds = ", ".join(
-            f"every {int(s['interval_seconds'])}s"
-            f"{' [active]' if s['active'] else ' [paused]'}"
+            (f"every {int(s['interval_seconds'])}s" if s['interval_seconds'] else "non-interval schedule")
+            + f"{' [active]' if s['active'] else ' [paused]'}"
             for s in dep["schedules"]) or "no schedule"
         print(f"    - {dep['name']}  | {scheds}  | tags={dep['tags']}")
 
@@ -139,6 +150,8 @@ def _print_report(d: dict) -> None:
     print(f"\n[4] WORK POOLS")
     wp = d["work_pools"]
     if isinstance(wp, list):
+        if not wp:
+            print("    No work pools: process-based serving is used.")
         for p in wp:
             print(f"    - {p['name']}  type={p['type']}  status={p['status']}")
     else:
@@ -155,9 +168,16 @@ def _print_report(d: dict) -> None:
 def main() -> None:
     config.ensure_dirs()
     details = asyncio.run(_gather())
-    _print_report(details)
+    import io
+    from contextlib import redirect_stdout
+    console = io.StringIO()
+    with redirect_stdout(console):
+        _print_report(details)
+    print(console.getvalue(), end="")
     out = config.OUTPUTS_DIR / "api_details.json"
-    out.write_text(json.dumps(details, indent=2), encoding="utf-8")
+    write_json(details, out)
+    with atomic_path(config.OUTPUTS_DIR / "api_access_console.txt") as temp:
+        temp.write_text(console.getvalue(), encoding="utf-8")
     print(f"Saved full API response to: {out}")
 
 

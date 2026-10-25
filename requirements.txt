@@ -1,12 +1,16 @@
 # CCZG506 Assignment I - Cloud-based Data Science / ML Application
-# Tested with Python 3.14 on Windows 11
+# Tested runtime: Python 3.12. See requirements-lock.txt for resolved packages.
 
-pandas
-numpy
-scikit-learn
-matplotlib
-seaborn
+pandas==2.2.3
+numpy==2.3.5
+scikit-learn==1.9.1
+matplotlib==3.11.2
+seaborn==0.13.2
 prefect==3.8.8
 # Prefect 3.8.x scheduler breaks on SQLAlchemy 2.1 (bulk DML change); pin to 2.0.x
-sqlalchemy<2.1
-python-docx
+sqlalchemy==2.0.55
+# Prefect 3.8.8 still uses Body(min_items=...); newer FastAPI removed it.
+fastapi==0.139.0
+starlette==1.10.0
+python-docx==1.2.0
+filelock==3.20.0

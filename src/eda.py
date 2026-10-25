@@ -12,9 +12,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
+from scipy.stats import chi2_contingency
 
 from src import config
 from src import viz_style as vs
+from src.artifact_io import atomic_path
 
 
 # ---------------------------------------------------------------------------
@@ -28,7 +30,7 @@ def encode_categoricals(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     """
     df = df.copy()
     mappings: dict[str, dict] = {}
-    cat_cols = df.select_dtypes(include="object").columns.tolist()
+    cat_cols = df.select_dtypes(include=["object", "string", "category"]).columns.tolist()
     cat_cols = [c for c in cat_cols if c != config.ID_COLUMN]
     for col in cat_cols:
         le = LabelEncoder()
@@ -54,8 +56,8 @@ def bin_tenure(df: pd.DataFrame) -> pd.DataFrame:
 # Correlation
 # ---------------------------------------------------------------------------
 def correlation_matrix(df_encoded: pd.DataFrame) -> pd.DataFrame:
-    """Pearson correlation across all (now numeric) features."""
-    cols = [c for c in df_encoded.columns if c != config.ID_COLUMN]
+    """Numeric/target Pearson correlations, excluding arbitrary category codes."""
+    cols = config.NUMERIC_COLUMNS + ["SeniorCitizen", config.TARGET_COLUMN]
     return df_encoded[cols].corr(numeric_only=True)
 
 
@@ -65,20 +67,43 @@ def target_correlations(corr: pd.DataFrame) -> pd.Series:
     return s.reindex(s.abs().sort_values(ascending=False).index)
 
 
+def categorical_associations(df: pd.DataFrame) -> pd.DataFrame:
+    """Cramer's V measures association without imposing a category order."""
+    columns = df.select_dtypes(include=["object", "string", "category"]).columns
+    rows = []
+    for col in columns:
+        if col in [config.ID_COLUMN, config.TARGET_COLUMN]:
+            continue
+        table = pd.crosstab(df[col], df[config.TARGET_COLUMN])
+        denominator = min(table.shape) - 1
+        if denominator > 0:
+            chi2 = chi2_contingency(table, correction=False)[0]
+            rows.append({"feature": col, "cramers_v": float(
+                np.sqrt(chi2 / (table.to_numpy().sum() * denominator)))})
+    return pd.DataFrame(rows, columns=["feature", "cramers_v"]).sort_values(
+        "cramers_v", ascending=False)
+
+
 # ---------------------------------------------------------------------------
 # Feature importance
 # ---------------------------------------------------------------------------
 def feature_importance(df_encoded: pd.DataFrame) -> pd.Series:
     """Random-forest feature importance w.r.t. churn (Activity 1.4)."""
-    X = df_encoded.drop(columns=[config.ID_COLUMN, config.TARGET_COLUMN])
+    X = df_encoded.drop(columns=[config.ID_COLUMN, config.TARGET_COLUMN]
+                        + [f"{c}_norm" for c in config.NUMERIC_COLUMNS])
+    categorical = [c for c in X.columns
+                   if c not in config.NUMERIC_COLUMNS + ["SeniorCitizen"]]
+    expanded = pd.get_dummies(X, columns=categorical, dtype=float)
     y = df_encoded[config.TARGET_COLUMN]
     rf = RandomForestClassifier(
         n_estimators=200, random_state=config.RANDOM_STATE, n_jobs=-1
     )
-    rf.fit(X, y)
-    return pd.Series(rf.feature_importances_, index=X.columns).sort_values(
-        ascending=False
-    )
+    rf.fit(expanded, y)
+    individual = pd.Series(rf.feature_importances_, index=expanded.columns)
+    # Aggregate one-hot levels back to each original feature for interpretation.
+    grouped = {c: float(individual[[n for n in individual.index
+                       if n == c or n.startswith(c + "_")]].sum()) for c in X.columns}
+    return pd.Series(grouped).sort_values(ascending=False)
 
 
 # ---------------------------------------------------------------------------
@@ -88,7 +113,8 @@ def _save(fig, name: str) -> str:
     config.ensure_dirs()
     path = config.EDA_DIR / name
     fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
+    with atomic_path(path) as temp:
+        fig.savefig(temp, bbox_inches="tight")
     plt.close(fig)
     return str(path)
 
@@ -166,13 +192,13 @@ def plot_charges_by_churn(df: pd.DataFrame) -> str:
 def plot_correlation_heatmap(corr: pd.DataFrame) -> str:
     """Correlation heatmap across all encoded features (diverging palette)."""
     vs.apply_base_style()
-    fig, ax = plt.subplots(figsize=(11, 9))
+    fig, ax = plt.subplots(figsize=(7.5, 6.3))
     im = ax.imshow(corr.values, cmap=vs.DIVERGING, vmin=-1, vmax=1)
-    ax.set_xticks(range(len(corr.columns)), corr.columns, rotation=90, fontsize=8)
-    ax.set_yticks(range(len(corr.index)), corr.index, fontsize=8)
+    ax.set_xticks(range(len(corr.columns)), corr.columns, rotation=90, fontsize=10)
+    ax.set_yticks(range(len(corr.index)), corr.index, fontsize=10)
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
     cbar.set_label("Pearson correlation")
-    ax.set_title("Correlation Matrix (all encoded features)")
+    ax.set_title("Pearson Correlations of Numeric Features and Churn")
     ax.grid(False)
     return _save(fig, "correlation_heatmap.png")
 

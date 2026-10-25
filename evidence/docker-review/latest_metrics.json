@@ -1,0 +1,60 @@
+{
+  "run_ts": "2026-10-25T09:05:12.730916+00:00",
+  "models": [
+    {
+      "model": "LogisticRegression",
+      "accuracy": 0.797,
+      "precision": 0.6435,
+      "recall": 0.5276,
+      "f1_score": 0.5798,
+      "roc_auc": 0.8403,
+      "ts": "2026-10-25T09:05:12.103211+00:00"
+    },
+    {
+      "model": "RandomForest",
+      "accuracy": 0.7847,
+      "precision": 0.6205,
+      "recall": 0.4866,
+      "f1_score": 0.5455,
+      "roc_auc": 0.8173,
+      "ts": "2026-10-25T09:05:12.513210+00:00"
+    }
+  ],
+  "best": {
+    "model": "LogisticRegression",
+    "accuracy": 0.797,
+    "precision": 0.6435,
+    "recall": 0.5276,
+    "f1_score": 0.5798,
+    "roc_auc": 0.8403,
+    "ts": "2026-10-25T09:05:12.103211+00:00"
+  },
+  "train_rows": 4930,
+  "test_rows": 2113,
+  "features": [
+    "gender",
+    "SeniorCitizen",
+    "Partner",
+    "Dependents",
+    "tenure",
+    "PhoneService",
+    "MultipleLines",
+    "InternetService",
+    "OnlineSecurity",
+    "OnlineBackup",
+    "DeviceProtection",
+    "TechSupport",
+    "StreamingTV",
+    "StreamingMovies",
+    "Contract",
+    "PaperlessBilling",
+    "PaymentMethod",
+    "MonthlyCharges",
+    "TotalCharges"
+  ],
+  "preprocessing_fit_scope": "training_only",
+  "pipeline_version": "2",
+  "source_sha256": "09b367c85672de3db3bb76acc243bb41a27328fc2ba4e396e817375a63596dcd",
+  "raw_dataset_sha256": "16320c9c1ec72448db59aa0a26a0b95401046bef5d02fd3aeb906448e3055e91",
+  "monitoring_scope": "Repeated holdout evaluation on a fixed dataset; no live drift detection"
+}

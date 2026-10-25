@@ -1,51 +1,27 @@
-"""
-Activity 1.5 - DataOps scheduling.
-
-Serves the data pipeline (and the ML pipeline) as Prefect deployments scheduled
-to run every 2 minutes, using an interval schedule. Prefect runs a local API
-server + dashboard (the "Cloud dashboard") and executes the scheduled runs.
-
-Usage (two terminals):
-
-  Terminal 1 - start the Prefect server + dashboard:
-      prefect server start
-      # dashboard at http://127.0.0.1:4200
-
-  Terminal 2 - point the client at that server and launch the deployments:
-      prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
-      python -m src.deploy
-
-This call blocks and serves both flows on a 2-minute interval. Open the
-dashboard to watch the scheduled runs, task logs, and activity details.
-"""
-from __future__ import annotations
-
+"""Serve one serialized DataOps -> MLOps workflow every two minutes."""
 from datetime import timedelta
-
 from prefect import serve
+from src import config
+from src.workflow import assignment_workflow
 
-from src.data_pipeline import data_pipeline
-from src.ml_pipeline import ml_pipeline
-
-INTERVAL = timedelta(minutes=2)  # Activity 1.5: run every 2 minutes
+INTERVAL = timedelta(minutes=2)
 
 
-def main() -> None:
-    data_deploy = data_pipeline.to_deployment(
-        name="telco-data-pipeline-every-2min",
+def make_deployment():
+    return assignment_workflow.to_deployment(
+        name=config.DEPLOYMENT_NAME,
         interval=INTERVAL,
-        tags=["dataops", "assignment1"],
-        description="Ingestion + preprocessing (1.3) + EDA (1.4), every 2 min.",
+        concurrency_limit=1,
+        tags=["assignment1", "dataops", "mlops"],
+        description="Preprocessing and EDA, then train-only ML preprocessing and evaluation; every 120s.",
+        version=config.PIPELINE_VERSION,
     )
-    ml_deploy = ml_pipeline.to_deployment(
-        name="telco-ml-pipeline-every-2min",
-        interval=INTERVAL,
-        tags=["mlops", "assignment1"],
-        description="Train + evaluate 2 models and log >=4 metrics, every 2 min.",
-    )
-    print("Serving deployments on a 2-minute interval. "
-          "Open the dashboard at http://127.0.0.1:4200  (Ctrl+C to stop).")
-    serve(data_deploy, ml_deploy)
+
+
+def main():
+    print("Serving one workflow every 120 seconds. DataOps completes before MLOps.")
+    print("Use the configured Prefect dashboard; local execution is not cloud evidence.")
+    serve(make_deployment(), limit=1)
 
 
 if __name__ == "__main__":

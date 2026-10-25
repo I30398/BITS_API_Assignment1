@@ -1,0 +1,8 @@
+.git
+.venv
+.env*
+**/__pycache__
+outputs
+report
+tests
+data/telco_churn_clean.csv
