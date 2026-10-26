@@ -1,0 +1,72 @@
+{
+  "environment": "BITS Prayogshala CCZG506 Virtual lab",
+  "vm_host": "ip-10-3-17-92.ap-south-1.compute.internal",
+  "editing": "Rectangular crop only. Session address and macOS chrome excluded.",
+  "captures": [
+    {
+      "file": "01_dashboard.png",
+      "capture_tool": "CleanShot X",
+      "captured_at_local": "2026-10-26T05:21:19+05:30",
+      "source_image_sha256": "ea7d54e51ca8660a2b5eca87b5bd006a665ff5e290e10808a9c400a5365cf7db",
+      "crop_pixels": [
+        0,
+        310,
+        3456,
+        2048
+      ],
+      "sha256": "844b1306c370a00d10c429224245d66f8475b4b99814247b95ff05d97a97d508"
+    },
+    {
+      "file": "02_flow_runs.png",
+      "capture_tool": "CleanShot X",
+      "captured_at_local": "2026-10-26T05:23:08+05:30",
+      "source_image_sha256": "447d7d89797f576ac4c25f04e9c7d440a2b72b0d22354b6a66354605f0d2441d",
+      "crop_pixels": [
+        0,
+        310,
+        3456,
+        2048
+      ],
+      "sha256": "0c437c28e01e9e8c44b553dd62558f715f8d2753f2b312f499d11c97856106f6"
+    },
+    {
+      "file": "03_deployments.png",
+      "capture_tool": "CleanShot X",
+      "captured_at_local": "2026-10-26T05:25:47+05:30",
+      "source_image_sha256": "e334bc56cef92f518ab014f159e6bed20d519fcdda9ebe93a9824851d1f5a127",
+      "crop_pixels": [
+        0,
+        310,
+        3456,
+        2048
+      ],
+      "sha256": "5359e29ae7ac2e36564ce331733874bfa65da8db902ac1be965ff2f5edb49edd"
+    },
+    {
+      "file": "05_ml_run_logs.png",
+      "capture_tool": "CleanShot X",
+      "captured_at_local": "2026-10-26T05:23:54+05:30",
+      "source_image_sha256": "d4a80ad7c81b750b80e576a0e0a2210c7a75f7a95163b3aabae257e8559fbf35",
+      "crop_pixels": [
+        0,
+        310,
+        3456,
+        2048
+      ],
+      "sha256": "f24da44dc45a554663b0aab006be5a109cec15289ecbf6375e5dd3a2f42f8bfb"
+    },
+    {
+      "file": "06_data_run_logs.png",
+      "capture_tool": "CleanShot X",
+      "captured_at_local": "2026-10-26T05:25:02+05:30",
+      "source_image_sha256": "d0cb85b554d20f14bff0d2eba16c3dc01dcbb2366a7bbe53f309ae5252fcdbda",
+      "crop_pixels": [
+        0,
+        310,
+        3456,
+        2048
+      ],
+      "sha256": "2713ba745e4c8468a80df1bb3c06e0e2e5d39e47b70b19c07466b0261b3e62e6"
+    }
+  ]
+}

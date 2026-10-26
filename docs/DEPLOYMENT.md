@@ -63,7 +63,9 @@ Keep the database, runtime and project evidence inside `~/workspace`. PostgreSQL
 setup passed a private application-role connection check on the lab. On 26
 October 2026, Prefect returned HTTP 200 and all 14 functional checks passed,
 including at least two completed scheduled parent workflows at the 120-second
-interval. Export of the cloud evidence and dashboard screenshots is pending.
+interval. Five cloud dashboard screenshots were captured and inspected on 26
+October 2026; see [the capture record](../evidence/cloud-prayogshala-20261026/README.md).
+Export of the frozen data, models and verification archive remains pending.
 
 Provisioning checkpoint, 26 October 2026:
 - The original workspace is a **soft** NFS mount. Changing it in place failed.
