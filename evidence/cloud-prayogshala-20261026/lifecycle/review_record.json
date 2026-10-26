@@ -1,0 +1,17 @@
+{
+  "record_method": "Transcribed from the observed VM terminal result; original result.json remains under ~/workspace/.assignment1-lifecycle-20261026 on the VM.",
+  "host": "ip-10-3-21-143.ap-south-1.compute.internal",
+  "started_at": "2026-10-26T16:10:06.921614+00:00",
+  "verified_at": "2026-10-26T16:13:58.491786+00:00",
+  "shutdown_checked_at": "2026-10-26T16:17:26.180433+00:00",
+  "functional_checks_passed": 14,
+  "functional_checks_total": 14,
+  "fresh_completed_scheduled_cycles": 5,
+  "launcher_stopped": true,
+  "postgres_stopped": true,
+  "dashboard_stopped": true,
+  "temporary_github_session_absent": true,
+  "source_commit": "05ea1a64bff5665b983790cec72bb8aa346ed73b",
+  "tracked_source_clean": true,
+  "archive_sha256": "00ca32c52f20044223366fc6eed0e7a5588e378113c52050d0f10fe8985365fc"
+}

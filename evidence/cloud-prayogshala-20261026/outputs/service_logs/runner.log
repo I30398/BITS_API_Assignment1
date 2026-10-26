@@ -1,0 +1,279 @@
+02:12:16.643 | WARNING | matplotlib.font_manager - Matplotlib is building the font cache; this may take a moment.
+Serving one workflow every 120 seconds. DataOps completes before MLOps.
+Use the configured Prefect dashboard; local execution is not cloud evidence.
+Your deployments are being served and polling for scheduled runs!
+
+Deployments
+┌───────────────────────────────────────────────────────┐
+│ telco-assignment-workflow/telco-assignment-every-2min │
+└───────────────────────────────────────────────────────┘
+
+To trigger any of these deployments, use the following command:
+
+        $ prefect deployment run [DEPLOYMENT_NAME]
+
+You can also trigger your deployments via the Prefect UI: http://127.0.0.1:4207/deployments
+
+02:14:40.108 | INFO    | Flow run 'exceptional-oriole' - Downloading flow code from storage at '.'
+02:14:46.536 | INFO    | Flow run 'exceptional-oriole' - Beginning flow run 'exceptional-oriole' for flow 'telco-assignment-workflow'
+02:14:46.540 | INFO    | Flow run 'exceptional-oriole' - View at http://127.0.0.1:4207/runs/flow-run/01a174cd-1039-7b20-9a68-466fd0b2104b
+02:14:47.469 | INFO    | Flow run 'boisterous-beluga' - Beginning subflow run 'boisterous-beluga' for flow 'telco-data-pipeline'
+02:14:47.470 | INFO    | Flow run 'boisterous-beluga' - View at http://127.0.0.1:4207/runs/flow-run/6d629fe6-5e4e-459a-b4ce-11794839519a
+02:14:47.513 | INFO    | Flow run 'boisterous-beluga' - [flow-start] Data pipeline run started | {}
+02:14:47.741 | INFO    | Task run 'ingest-data-c0b' - [1.2-ingestion] Loaded raw dataset | {'rows': 7043, 'cols': 21}
+02:14:47.744 | INFO    | Task run 'ingest-data-c0b' - Finished in state Completed()
+02:14:47.854 | INFO    | Task run 'coerce-and-summarise-a61' - [1.3-summary-stats] Computed summary statistics | {'numeric_features': ['SeniorCitizen', 'tenure', 'MonthlyCharges', 'TotalCharges']}
+02:14:47.883 | INFO    | Task run 'coerce-and-summarise-a61' - [1.3-data-types] Captured column data types | {'n_numeric': 4, 'n_non_numeric': 17, 'column_types': {'customerID': 'object', 'gender': 'object', 'SeniorCitizen': 'int64', 'Partner': 'object', 'Dependents': 'object', 'tenure': 'int64', 'PhoneService': 'object', 'MultipleLines': 'object', 'InternetService': 'object', 'OnlineSecurity': 'object', 'OnlineBackup': 'object', 'DeviceProtection': 'object', 'TechSupport': 'object', 'StreamingTV': 'object', 'StreamingMovies': 'object', 'Contract': 'object', 'PaperlessBilling': 'object', 'PaymentMethod': 'object', 'MonthlyCharges': 'float64', 'TotalCharges': 'float64', 'Churn': 'object'}}
+02:14:48.092 | INFO    | Task run 'coerce-and-summarise-a61' - Finished in state Completed()
+02:14:48.162 | INFO    | Task run 'check-and-induce-missing-552' - [1.3-missing-check] Checked missing values (pre-induction) | {'columns_with_missing': ['TotalCharges'], 'total_missing': 11}
+02:14:48.336 | INFO    | Task run 'check-and-induce-missing-552' - [1.3-induce-missing] Induced missing data into numeric columns | {'induced': {'tenure': 352, 'MonthlyCharges': 352, 'TotalCharges': 352}}
+02:14:48.430 | INFO    | Task run 'check-and-induce-missing-552' - [1.3-missing-check-post] Checked missing values (post-induction) | {'total_missing': 1066}
+02:14:48.465 | INFO    | Task run 'check-and-induce-missing-552' - [1.3-impute] Imputed numeric missing values with median | {'remaining_missing': 0}
+02:14:48.469 | INFO    | Task run 'check-and-induce-missing-552' - Finished in state Completed()
+02:14:48.980 | INFO    | Task run 'normalise-data-f50' - [1.3-normalise] Min-Max normalised numeric columns to [0,1] | {'normalised': ['tenure', 'MonthlyCharges', 'TotalCharges']}
+02:14:48.983 | INFO    | Task run 'normalise-data-f50' - Finished in state Completed()
+02:14:49.140 | INFO    | Task run 'eda-encode-and-bin-de2' - [1.4-binning] Binned tenure into tenure_group | {'bins': {'0-1 yr': 2092, '2-4 yr': 1858, '5+ yr': 1336, '1-2 yr': 967, '4-5 yr': 790}}
+02:14:49.164 | INFO    | Task run 'eda-encode-and-bin-de2' - [1.4-encoding] Label-encoded categorical features | {'n_encoded': 16}
+02:14:49.231 | INFO    | Task run 'eda-encode-and-bin-de2' - Finished in state Completed()
+02:14:49.828 | INFO    | Task run 'eda-correlation-112' - [1.4-correlation] Computed correlation coefficients | {'top_target_correlations': {'tenure': -0.34, 'TotalCharges': -0.196, 'MonthlyCharges': 0.188, 'SeniorCitizen': 0.151}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/correlation_heatmap.png'}
+02:14:49.831 | INFO    | Task run 'eda-correlation-112' - Finished in state Completed()
+/home/s2025mt03009/workspace/.assignment1-python/cpython-3.12.15-linux-x86_64-gnu/lib/python3.12/asyncio/selector_events.py:879: ResourceWarning: unclosed transport <_SelectorSocketTransport fd=6 read=idle write=<idle, bufsize=0>>
+  _warn(f"unclosed transport {self!r}", ResourceWarning, source=self)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+02:14:52.031 | INFO    | Task run 'eda-feature-importance-a25' - [1.4-feature-importance] Assessed feature importance (Random Forest) | {'top_features': {'TotalCharges': 0.1594, 'tenure': 0.1442, 'MonthlyCharges': 0.1356, 'Contract': 0.0807, 'PaymentMethod': 0.0648}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/feature_importance.png'}
+02:14:52.035 | INFO    | Task run 'eda-feature-importance-a25' - Finished in state Completed()
+02:14:52.300 | INFO    | Task run 'eda-visualise-f06' - [1.4-categorical-association] Calculated Cramer's V for categorical features | {'top_associations': [{'feature': 'Contract', 'cramers_v': 0.4101156965761409}, {'feature': 'OnlineSecurity', 'cramers_v': 0.3474004326740552}, {'feature': 'TechSupport', 'cramers_v': 0.3429161982469257}, {'feature': 'tenure_group', 'cramers_v': 0.3405349243382388}, {'feature': 'InternetService', 'cramers_v': 0.32245455521230887}]}
+02:14:53.211 | INFO    | Task run 'eda-visualise-f06' - [1.4-visualise] Generated univariate & bivariate charts | {'charts': {'churn_distribution': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_churn_distribution.png', 'tenure_histogram': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_tenure_histogram.png', 'churn_by_contract': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_churn_by_contract.png', 'charges_by_churn': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_charges_by_churn.png'}}
+02:14:53.215 | INFO    | Task run 'eda-visualise-f06' - Finished in state Completed()
+02:14:53.425 | INFO    | Task run 'persist-clean-dataset-578' - [1.3-persist] Saved full-data EDA dataset; ML fits its own preprocessing | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/data/telco_churn_clean.csv', 'rows': 7043}
+02:14:53.429 | INFO    | Task run 'persist-clean-dataset-578' - Finished in state Completed()
+02:14:53.456 | INFO    | Flow run 'boisterous-beluga' - [flow-end] Data pipeline run completed successfully | {}
+02:14:54.490 | INFO    | Flow run 'boisterous-beluga' - Finished in state Completed()
+02:14:55.089 | INFO    | Flow run 'cautious-gaur' - Beginning subflow run 'cautious-gaur' for flow 'telco-ml-pipeline'
+02:14:55.090 | INFO    | Flow run 'cautious-gaur' - View at http://127.0.0.1:4207/runs/flow-run/a90e9411-d165-40df-9e8a-7942ef6cded4
+02:14:55.130 | INFO    | Flow run 'cautious-gaur' - [flow-start] ML pipeline run started | {}
+02:14:55.176 | INFO    | Task run 'load-model-data-719' - [2.1-load] Loaded pre-imputation snapshot; transformations fit on train only | {'rows': 7043, 'cols': 21}
+02:14:55.181 | INFO    | Task run 'load-model-data-719' - Finished in state Completed()
+02:14:55.243 | INFO    | Task run 'train-test-split-90f' - [2.2-split] Split data 70/30 (stratified) | {'train_rows': 4930, 'test_rows': 2113, 'test_size': 0.3}
+02:14:55.247 | INFO    | Task run 'train-test-split-90f' - Finished in state Completed()
+02:14:55.513 | INFO    | Task run 'train-logistic-regression-d1e' - [2.4-mlops] Trained & evaluated Logistic Regression | {'model': 'LogisticRegression', 'accuracy': 0.797, 'precision': 0.6435, 'recall': 0.5276, 'f1_score': 0.5798, 'roc_auc': 0.8403, 'ts': '2026-10-25T20:44:55.460471+00:00'}
+02:14:55.517 | INFO    | Task run 'train-logistic-regression-d1e' - Finished in state Completed()
+02:14:57.229 | INFO    | Task run 'train-random-forest-e4d' - [2.4-mlops] Trained & evaluated Random Forest | {'model': 'RandomForest', 'accuracy': 0.7847, 'precision': 0.6205, 'recall': 0.4866, 'f1_score': 0.5455, 'roc_auc': 0.8173, 'ts': '2026-10-25T20:44:56.981913+00:00'}
+02:14:57.233 | INFO    | Task run 'train-random-forest-e4d' - Finished in state Completed()
+02:14:57.369 | INFO    | Task run 'record-metrics-history-bf5' - [2.4-mlops] Appended metrics to monitoring history | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/metrics_history.csv', 'models': ['LogisticRegression', 'RandomForest']}
+02:14:57.373 | INFO    | Task run 'record-metrics-history-bf5' - Finished in state Completed()
+02:14:57.719 | INFO    | Task run 'plot-model-comparison-97e' - [2.4-mlops] Saved model comparison chart | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/model_comparison.png'}
+02:14:57.723 | INFO    | Task run 'plot-model-comparison-97e' - Finished in state Completed()
+02:14:58.014 | INFO    | Task run 'plot-confusion-matrices-493' - [2.4-mlops] Saved confusion matrices | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/confusion_matrices.png'}
+02:14:58.017 | INFO    | Task run 'plot-confusion-matrices-493' - Finished in state Completed()
+02:14:58.043 | INFO    | Flow run 'cautious-gaur' - [flow-end] ML pipeline run completed | {'best_model': 'LogisticRegression', 'best_f1': 0.5798}
+02:14:59.093 | INFO    | Flow run 'cautious-gaur' - Finished in state Completed()
+02:14:59.616 | INFO    | Flow run 'exceptional-oriole' - Finished in state Completed()
+02:16:36.329 | INFO    | Flow run 'convivial-unicorn' - Downloading flow code from storage at '.'
+02:16:42.020 | INFO    | Flow run 'convivial-unicorn' - Beginning flow run 'convivial-unicorn' for flow 'telco-assignment-workflow'
+02:16:42.024 | INFO    | Flow run 'convivial-unicorn' - View at http://127.0.0.1:4207/runs/flow-run/01a174cd-1039-74c1-9518-ea6783ce2d35
+02:16:42.369 | INFO    | Flow run 'refreshing-clam' - Beginning subflow run 'refreshing-clam' for flow 'telco-data-pipeline'
+02:16:42.371 | INFO    | Flow run 'refreshing-clam' - View at http://127.0.0.1:4207/runs/flow-run/e0e97363-76c4-4225-8b56-0becaed352ed
+02:16:42.405 | INFO    | Flow run 'refreshing-clam' - [flow-start] Data pipeline run started | {}
+02:16:42.499 | INFO    | Task run 'ingest-data-fe9' - [1.2-ingestion] Loaded raw dataset | {'rows': 7043, 'cols': 21}
+02:16:42.503 | INFO    | Task run 'ingest-data-fe9' - Finished in state Completed()
+02:16:42.566 | INFO    | Task run 'coerce-and-summarise-f40' - [1.3-summary-stats] Computed summary statistics | {'numeric_features': ['SeniorCitizen', 'tenure', 'MonthlyCharges', 'TotalCharges']}
+02:16:42.595 | INFO    | Task run 'coerce-and-summarise-f40' - [1.3-data-types] Captured column data types | {'n_numeric': 4, 'n_non_numeric': 17, 'column_types': {'customerID': 'object', 'gender': 'object', 'SeniorCitizen': 'int64', 'Partner': 'object', 'Dependents': 'object', 'tenure': 'int64', 'PhoneService': 'object', 'MultipleLines': 'object', 'InternetService': 'object', 'OnlineSecurity': 'object', 'OnlineBackup': 'object', 'DeviceProtection': 'object', 'TechSupport': 'object', 'StreamingTV': 'object', 'StreamingMovies': 'object', 'Contract': 'object', 'PaperlessBilling': 'object', 'PaymentMethod': 'object', 'MonthlyCharges': 'float64', 'TotalCharges': 'float64', 'Churn': 'object'}}
+02:16:42.720 | INFO    | Task run 'coerce-and-summarise-f40' - Finished in state Completed()
+02:16:42.778 | INFO    | Task run 'check-and-induce-missing-810' - [1.3-missing-check] Checked missing values (pre-induction) | {'columns_with_missing': ['TotalCharges'], 'total_missing': 11}
+02:16:42.949 | INFO    | Task run 'check-and-induce-missing-810' - [1.3-induce-missing] Induced missing data into numeric columns | {'induced': {'tenure': 352, 'MonthlyCharges': 352, 'TotalCharges': 352}}
+02:16:43.032 | INFO    | Task run 'check-and-induce-missing-810' - [1.3-missing-check-post] Checked missing values (post-induction) | {'total_missing': 1066}
+02:16:43.068 | INFO    | Task run 'check-and-induce-missing-810' - [1.3-impute] Imputed numeric missing values with median | {'remaining_missing': 0}
+02:16:43.072 | INFO    | Task run 'check-and-induce-missing-810' - Finished in state Completed()
+02:16:43.248 | INFO    | Task run 'normalise-data-339' - [1.3-normalise] Min-Max normalised numeric columns to [0,1] | {'normalised': ['tenure', 'MonthlyCharges', 'TotalCharges']}
+02:16:43.252 | INFO    | Task run 'normalise-data-339' - Finished in state Completed()
+02:16:43.403 | INFO    | Task run 'eda-encode-and-bin-acb' - [1.4-binning] Binned tenure into tenure_group | {'bins': {'0-1 yr': 2092, '2-4 yr': 1858, '5+ yr': 1336, '1-2 yr': 967, '4-5 yr': 790}}
+02:16:43.427 | INFO    | Task run 'eda-encode-and-bin-acb' - [1.4-encoding] Label-encoded categorical features | {'n_encoded': 16}
+02:16:43.502 | INFO    | Task run 'eda-encode-and-bin-acb' - Finished in state Completed()
+02:16:43.926 | INFO    | Task run 'eda-correlation-31e' - [1.4-correlation] Computed correlation coefficients | {'top_target_correlations': {'tenure': -0.34, 'TotalCharges': -0.196, 'MonthlyCharges': 0.188, 'SeniorCitizen': 0.151}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/correlation_heatmap.png'}
+02:16:43.929 | INFO    | Task run 'eda-correlation-31e' - Finished in state Completed()
+02:16:46.083 | INFO    | Task run 'eda-feature-importance-681' - [1.4-feature-importance] Assessed feature importance (Random Forest) | {'top_features': {'TotalCharges': 0.1594, 'tenure': 0.1442, 'MonthlyCharges': 0.1356, 'Contract': 0.0807, 'PaymentMethod': 0.0648}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/feature_importance.png'}
+02:16:46.087 | INFO    | Task run 'eda-feature-importance-681' - Finished in state Completed()
+02:16:46.303 | INFO    | Task run 'eda-visualise-5f7' - [1.4-categorical-association] Calculated Cramer's V for categorical features | {'top_associations': [{'feature': 'Contract', 'cramers_v': 0.4101156965761409}, {'feature': 'OnlineSecurity', 'cramers_v': 0.3474004326740552}, {'feature': 'TechSupport', 'cramers_v': 0.3429161982469257}, {'feature': 'tenure_group', 'cramers_v': 0.3405349243382388}, {'feature': 'InternetService', 'cramers_v': 0.32245455521230887}]}
+02:16:47.195 | INFO    | Task run 'eda-visualise-5f7' - [1.4-visualise] Generated univariate & bivariate charts | {'charts': {'churn_distribution': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_churn_distribution.png', 'tenure_histogram': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_tenure_histogram.png', 'churn_by_contract': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_churn_by_contract.png', 'charges_by_churn': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_charges_by_churn.png'}}
+02:16:47.199 | INFO    | Task run 'eda-visualise-5f7' - Finished in state Completed()
+02:16:47.428 | INFO    | Task run 'persist-clean-dataset-059' - [1.3-persist] Saved full-data EDA dataset; ML fits its own preprocessing | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/data/telco_churn_clean.csv', 'rows': 7043}
+02:16:47.432 | INFO    | Task run 'persist-clean-dataset-059' - Finished in state Completed()
+02:16:47.456 | INFO    | Flow run 'refreshing-clam' - [flow-end] Data pipeline run completed successfully | {}
+02:16:48.393 | INFO    | Flow run 'refreshing-clam' - Finished in state Completed()
+02:16:48.963 | INFO    | Flow run 'neon-shrew' - Beginning subflow run 'neon-shrew' for flow 'telco-ml-pipeline'
+02:16:48.964 | INFO    | Flow run 'neon-shrew' - View at http://127.0.0.1:4207/runs/flow-run/6630b200-467f-4d97-947c-4362bbe4d13d
+02:16:48.997 | INFO    | Flow run 'neon-shrew' - [flow-start] ML pipeline run started | {}
+02:16:49.040 | INFO    | Task run 'load-model-data-925' - [2.1-load] Loaded pre-imputation snapshot; transformations fit on train only | {'rows': 7043, 'cols': 21}
+02:16:49.044 | INFO    | Task run 'load-model-data-925' - Finished in state Completed()
+02:16:49.105 | INFO    | Task run 'train-test-split-560' - [2.2-split] Split data 70/30 (stratified) | {'train_rows': 4930, 'test_rows': 2113, 'test_size': 0.3}
+02:16:49.109 | INFO    | Task run 'train-test-split-560' - Finished in state Completed()
+02:16:49.330 | INFO    | Task run 'train-logistic-regression-b30' - [2.4-mlops] Trained & evaluated Logistic Regression | {'model': 'LogisticRegression', 'accuracy': 0.797, 'precision': 0.6435, 'recall': 0.5276, 'f1_score': 0.5798, 'roc_auc': 0.8403, 'ts': '2026-10-25T20:46:49.285452+00:00'}
+02:16:49.333 | INFO    | Task run 'train-logistic-regression-b30' - Finished in state Completed()
+02:16:51.079 | INFO    | Task run 'train-random-forest-83c' - [2.4-mlops] Trained & evaluated Random Forest | {'model': 'RandomForest', 'accuracy': 0.7847, 'precision': 0.6205, 'recall': 0.4866, 'f1_score': 0.5455, 'roc_auc': 0.8173, 'ts': '2026-10-25T20:46:50.812201+00:00'}
+02:16:51.083 | INFO    | Task run 'train-random-forest-83c' - Finished in state Completed()
+02:16:51.198 | INFO    | Task run 'record-metrics-history-8c3' - [2.4-mlops] Appended metrics to monitoring history | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/metrics_history.csv', 'models': ['LogisticRegression', 'RandomForest']}
+02:16:51.202 | INFO    | Task run 'record-metrics-history-8c3' - Finished in state Completed()
+02:16:51.558 | INFO    | Task run 'plot-model-comparison-550' - [2.4-mlops] Saved model comparison chart | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/model_comparison.png'}
+02:16:51.562 | INFO    | Task run 'plot-model-comparison-550' - Finished in state Completed()
+02:16:51.836 | INFO    | Task run 'plot-confusion-matrices-c27' - [2.4-mlops] Saved confusion matrices | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/confusion_matrices.png'}
+02:16:51.839 | INFO    | Task run 'plot-confusion-matrices-c27' - Finished in state Completed()
+02:16:51.863 | INFO    | Flow run 'neon-shrew' - [flow-end] ML pipeline run completed | {'best_model': 'LogisticRegression', 'best_f1': 0.5798}
+02:16:51.966 | INFO    | Flow run 'neon-shrew' - Finished in state Completed()
+02:16:53.175 | INFO    | Flow run 'convivial-unicorn' - Finished in state Completed()
+02:18:36.961 | INFO    | Flow run 'radical-dugong' - Downloading flow code from storage at '.'
+02:18:42.802 | INFO    | Flow run 'radical-dugong' - Beginning flow run 'radical-dugong' for flow 'telco-assignment-workflow'
+02:18:42.806 | INFO    | Flow run 'radical-dugong' - View at http://127.0.0.1:4207/runs/flow-run/01a174cd-1039-7776-820f-92273f6ef75c
+02:18:43.155 | INFO    | Flow run 'exuberant-harrier' - Beginning subflow run 'exuberant-harrier' for flow 'telco-data-pipeline'
+02:18:43.157 | INFO    | Flow run 'exuberant-harrier' - View at http://127.0.0.1:4207/runs/flow-run/4e2cd3c5-b759-4c98-802f-29e9dae18d8a
+02:18:43.189 | INFO    | Flow run 'exuberant-harrier' - [flow-start] Data pipeline run started | {}
+02:18:43.278 | INFO    | Task run 'ingest-data-12d' - [1.2-ingestion] Loaded raw dataset | {'rows': 7043, 'cols': 21}
+02:18:43.282 | INFO    | Task run 'ingest-data-12d' - Finished in state Completed()
+02:18:43.347 | INFO    | Task run 'coerce-and-summarise-53c' - [1.3-summary-stats] Computed summary statistics | {'numeric_features': ['SeniorCitizen', 'tenure', 'MonthlyCharges', 'TotalCharges']}
+02:18:43.377 | INFO    | Task run 'coerce-and-summarise-53c' - [1.3-data-types] Captured column data types | {'n_numeric': 4, 'n_non_numeric': 17, 'column_types': {'customerID': 'object', 'gender': 'object', 'SeniorCitizen': 'int64', 'Partner': 'object', 'Dependents': 'object', 'tenure': 'int64', 'PhoneService': 'object', 'MultipleLines': 'object', 'InternetService': 'object', 'OnlineSecurity': 'object', 'OnlineBackup': 'object', 'DeviceProtection': 'object', 'TechSupport': 'object', 'StreamingTV': 'object', 'StreamingMovies': 'object', 'Contract': 'object', 'PaperlessBilling': 'object', 'PaymentMethod': 'object', 'MonthlyCharges': 'float64', 'TotalCharges': 'float64', 'Churn': 'object'}}
+02:18:43.503 | INFO    | Task run 'coerce-and-summarise-53c' - Finished in state Completed()
+02:18:43.561 | INFO    | Task run 'check-and-induce-missing-5d3' - [1.3-missing-check] Checked missing values (pre-induction) | {'columns_with_missing': ['TotalCharges'], 'total_missing': 11}
+02:18:43.734 | INFO    | Task run 'check-and-induce-missing-5d3' - [1.3-induce-missing] Induced missing data into numeric columns | {'induced': {'tenure': 352, 'MonthlyCharges': 352, 'TotalCharges': 352}}
+02:18:43.818 | INFO    | Task run 'check-and-induce-missing-5d3' - [1.3-missing-check-post] Checked missing values (post-induction) | {'total_missing': 1066}
+02:18:43.855 | INFO    | Task run 'check-and-induce-missing-5d3' - [1.3-impute] Imputed numeric missing values with median | {'remaining_missing': 0}
+02:18:43.859 | INFO    | Task run 'check-and-induce-missing-5d3' - Finished in state Completed()
+02:18:44.021 | INFO    | Task run 'normalise-data-ce5' - [1.3-normalise] Min-Max normalised numeric columns to [0,1] | {'normalised': ['tenure', 'MonthlyCharges', 'TotalCharges']}
+02:18:44.025 | INFO    | Task run 'normalise-data-ce5' - Finished in state Completed()
+02:18:44.170 | INFO    | Task run 'eda-encode-and-bin-7fd' - [1.4-binning] Binned tenure into tenure_group | {'bins': {'0-1 yr': 2092, '2-4 yr': 1858, '5+ yr': 1336, '1-2 yr': 967, '4-5 yr': 790}}
+02:18:44.195 | INFO    | Task run 'eda-encode-and-bin-7fd' - [1.4-encoding] Label-encoded categorical features | {'n_encoded': 16}
+02:18:44.265 | INFO    | Task run 'eda-encode-and-bin-7fd' - Finished in state Completed()
+02:18:44.714 | INFO    | Task run 'eda-correlation-e6d' - [1.4-correlation] Computed correlation coefficients | {'top_target_correlations': {'tenure': -0.34, 'TotalCharges': -0.196, 'MonthlyCharges': 0.188, 'SeniorCitizen': 0.151}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/correlation_heatmap.png'}
+02:18:44.718 | INFO    | Task run 'eda-correlation-e6d' - Finished in state Completed()
+02:18:46.924 | INFO    | Task run 'eda-feature-importance-e3a' - [1.4-feature-importance] Assessed feature importance (Random Forest) | {'top_features': {'TotalCharges': 0.1594, 'tenure': 0.1442, 'MonthlyCharges': 0.1356, 'Contract': 0.0807, 'PaymentMethod': 0.0648}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/feature_importance.png'}
+02:18:46.928 | INFO    | Task run 'eda-feature-importance-e3a' - Finished in state Completed()
+02:18:47.172 | INFO    | Task run 'eda-visualise-f27' - [1.4-categorical-association] Calculated Cramer's V for categorical features | {'top_associations': [{'feature': 'Contract', 'cramers_v': 0.4101156965761409}, {'feature': 'OnlineSecurity', 'cramers_v': 0.3474004326740552}, {'feature': 'TechSupport', 'cramers_v': 0.3429161982469257}, {'feature': 'tenure_group', 'cramers_v': 0.3405349243382388}, {'feature': 'InternetService', 'cramers_v': 0.32245455521230887}]}
+02:18:48.069 | INFO    | Task run 'eda-visualise-f27' - [1.4-visualise] Generated univariate & bivariate charts | {'charts': {'churn_distribution': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_churn_distribution.png', 'tenure_histogram': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_tenure_histogram.png', 'churn_by_contract': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_churn_by_contract.png', 'charges_by_churn': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_charges_by_churn.png'}}
+02:18:48.073 | INFO    | Task run 'eda-visualise-f27' - Finished in state Completed()
+02:18:48.278 | INFO    | Task run 'persist-clean-dataset-cad' - [1.3-persist] Saved full-data EDA dataset; ML fits its own preprocessing | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/data/telco_churn_clean.csv', 'rows': 7043}
+02:18:48.281 | INFO    | Task run 'persist-clean-dataset-cad' - Finished in state Completed()
+02:18:48.306 | INFO    | Flow run 'exuberant-harrier' - [flow-end] Data pipeline run completed successfully | {}
+02:18:49.175 | INFO    | Flow run 'exuberant-harrier' - Finished in state Completed()
+02:18:49.732 | INFO    | Flow run 'rigorous-hound' - Beginning subflow run 'rigorous-hound' for flow 'telco-ml-pipeline'
+02:18:49.733 | INFO    | Flow run 'rigorous-hound' - View at http://127.0.0.1:4207/runs/flow-run/adb804f7-cfa3-407c-b8e2-3a2495a05f28
+02:18:49.765 | INFO    | Flow run 'rigorous-hound' - [flow-start] ML pipeline run started | {}
+02:18:49.808 | INFO    | Task run 'load-model-data-828' - [2.1-load] Loaded pre-imputation snapshot; transformations fit on train only | {'rows': 7043, 'cols': 21}
+02:18:49.812 | INFO    | Task run 'load-model-data-828' - Finished in state Completed()
+02:18:49.868 | INFO    | Task run 'train-test-split-5cc' - [2.2-split] Split data 70/30 (stratified) | {'train_rows': 4930, 'test_rows': 2113, 'test_size': 0.3}
+02:18:49.873 | INFO    | Task run 'train-test-split-5cc' - Finished in state Completed()
+02:18:50.098 | INFO    | Task run 'train-logistic-regression-7bd' - [2.4-mlops] Trained & evaluated Logistic Regression | {'model': 'LogisticRegression', 'accuracy': 0.797, 'precision': 0.6435, 'recall': 0.5276, 'f1_score': 0.5798, 'roc_auc': 0.8403, 'ts': '2026-10-25T20:48:50.053125+00:00'}
+02:18:50.102 | INFO    | Task run 'train-logistic-regression-7bd' - Finished in state Completed()
+02:18:51.835 | INFO    | Task run 'train-random-forest-ac8' - [2.4-mlops] Trained & evaluated Random Forest | {'model': 'RandomForest', 'accuracy': 0.7847, 'precision': 0.6205, 'recall': 0.4866, 'f1_score': 0.5455, 'roc_auc': 0.8173, 'ts': '2026-10-25T20:48:51.567668+00:00'}
+02:18:51.839 | INFO    | Task run 'train-random-forest-ac8' - Finished in state Completed()
+02:18:51.956 | INFO    | Task run 'record-metrics-history-5a2' - [2.4-mlops] Appended metrics to monitoring history | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/metrics_history.csv', 'models': ['LogisticRegression', 'RandomForest']}
+02:18:51.959 | INFO    | Task run 'record-metrics-history-5a2' - Finished in state Completed()
+02:18:52.337 | INFO    | Task run 'plot-model-comparison-68d' - [2.4-mlops] Saved model comparison chart | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/model_comparison.png'}
+02:18:52.341 | INFO    | Task run 'plot-model-comparison-68d' - Finished in state Completed()
+02:18:52.621 | INFO    | Task run 'plot-confusion-matrices-296' - [2.4-mlops] Saved confusion matrices | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/confusion_matrices.png'}
+02:18:52.625 | INFO    | Task run 'plot-confusion-matrices-296' - Finished in state Completed()
+02:18:52.650 | INFO    | Flow run 'rigorous-hound' - [flow-end] ML pipeline run completed | {'best_model': 'LogisticRegression', 'best_f1': 0.5798}
+02:18:53.735 | INFO    | Flow run 'rigorous-hound' - Finished in state Completed()
+02:18:54.902 | INFO    | Flow run 'radical-dugong' - Finished in state Completed()
+02:20:36.511 | INFO    | Flow run 'busy-kelpie' - Downloading flow code from storage at '.'
+02:20:42.579 | INFO    | Flow run 'busy-kelpie' - Beginning flow run 'busy-kelpie' for flow 'telco-assignment-workflow'
+02:20:42.584 | INFO    | Flow run 'busy-kelpie' - View at http://127.0.0.1:4207/runs/flow-run/01a174cd-1039-77a9-a78a-73d71ca7698d
+02:20:42.920 | INFO    | Flow run 'acrid-angelfish' - Beginning subflow run 'acrid-angelfish' for flow 'telco-data-pipeline'
+02:20:42.921 | INFO    | Flow run 'acrid-angelfish' - View at http://127.0.0.1:4207/runs/flow-run/b8a687c4-7064-4c10-b6cb-5549ad96dcb4
+02:20:42.956 | INFO    | Flow run 'acrid-angelfish' - [flow-start] Data pipeline run started | {}
+02:20:43.048 | INFO    | Task run 'ingest-data-2b1' - [1.2-ingestion] Loaded raw dataset | {'rows': 7043, 'cols': 21}
+02:20:43.051 | INFO    | Task run 'ingest-data-2b1' - Finished in state Completed()
+02:20:43.120 | INFO    | Task run 'coerce-and-summarise-572' - [1.3-summary-stats] Computed summary statistics | {'numeric_features': ['SeniorCitizen', 'tenure', 'MonthlyCharges', 'TotalCharges']}
+02:20:43.149 | INFO    | Task run 'coerce-and-summarise-572' - [1.3-data-types] Captured column data types | {'n_numeric': 4, 'n_non_numeric': 17, 'column_types': {'customerID': 'object', 'gender': 'object', 'SeniorCitizen': 'int64', 'Partner': 'object', 'Dependents': 'object', 'tenure': 'int64', 'PhoneService': 'object', 'MultipleLines': 'object', 'InternetService': 'object', 'OnlineSecurity': 'object', 'OnlineBackup': 'object', 'DeviceProtection': 'object', 'TechSupport': 'object', 'StreamingTV': 'object', 'StreamingMovies': 'object', 'Contract': 'object', 'PaperlessBilling': 'object', 'PaymentMethod': 'object', 'MonthlyCharges': 'float64', 'TotalCharges': 'float64', 'Churn': 'object'}}
+02:20:43.253 | INFO    | Task run 'coerce-and-summarise-572' - Finished in state Completed()
+02:20:43.316 | INFO    | Task run 'check-and-induce-missing-8e4' - [1.3-missing-check] Checked missing values (pre-induction) | {'columns_with_missing': ['TotalCharges'], 'total_missing': 11}
+02:20:43.497 | INFO    | Task run 'check-and-induce-missing-8e4' - [1.3-induce-missing] Induced missing data into numeric columns | {'induced': {'tenure': 352, 'MonthlyCharges': 352, 'TotalCharges': 352}}
+02:20:43.581 | INFO    | Task run 'check-and-induce-missing-8e4' - [1.3-missing-check-post] Checked missing values (post-induction) | {'total_missing': 1066}
+02:20:43.617 | INFO    | Task run 'check-and-induce-missing-8e4' - [1.3-impute] Imputed numeric missing values with median | {'remaining_missing': 0}
+02:20:43.621 | INFO    | Task run 'check-and-induce-missing-8e4' - Finished in state Completed()
+02:20:43.799 | INFO    | Task run 'normalise-data-b1a' - [1.3-normalise] Min-Max normalised numeric columns to [0,1] | {'normalised': ['tenure', 'MonthlyCharges', 'TotalCharges']}
+02:20:43.803 | INFO    | Task run 'normalise-data-b1a' - Finished in state Completed()
+02:20:43.948 | INFO    | Task run 'eda-encode-and-bin-0a1' - [1.4-binning] Binned tenure into tenure_group | {'bins': {'0-1 yr': 2092, '2-4 yr': 1858, '5+ yr': 1336, '1-2 yr': 967, '4-5 yr': 790}}
+02:20:43.986 | INFO    | Task run 'eda-encode-and-bin-0a1' - [1.4-encoding] Label-encoded categorical features | {'n_encoded': 16}
+02:20:44.060 | INFO    | Task run 'eda-encode-and-bin-0a1' - Finished in state Completed()
+02:20:44.501 | INFO    | Task run 'eda-correlation-20d' - [1.4-correlation] Computed correlation coefficients | {'top_target_correlations': {'tenure': -0.34, 'TotalCharges': -0.196, 'MonthlyCharges': 0.188, 'SeniorCitizen': 0.151}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/correlation_heatmap.png'}
+02:20:44.504 | INFO    | Task run 'eda-correlation-20d' - Finished in state Completed()
+02:20:46.674 | INFO    | Task run 'eda-feature-importance-03b' - [1.4-feature-importance] Assessed feature importance (Random Forest) | {'top_features': {'TotalCharges': 0.1594, 'tenure': 0.1442, 'MonthlyCharges': 0.1356, 'Contract': 0.0807, 'PaymentMethod': 0.0648}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/feature_importance.png'}
+02:20:46.677 | INFO    | Task run 'eda-feature-importance-03b' - Finished in state Completed()
+02:20:46.945 | INFO    | Task run 'eda-visualise-937' - [1.4-categorical-association] Calculated Cramer's V for categorical features | {'top_associations': [{'feature': 'Contract', 'cramers_v': 0.4101156965761409}, {'feature': 'OnlineSecurity', 'cramers_v': 0.3474004326740552}, {'feature': 'TechSupport', 'cramers_v': 0.3429161982469257}, {'feature': 'tenure_group', 'cramers_v': 0.3405349243382388}, {'feature': 'InternetService', 'cramers_v': 0.32245455521230887}]}
+02:20:47.850 | INFO    | Task run 'eda-visualise-937' - [1.4-visualise] Generated univariate & bivariate charts | {'charts': {'churn_distribution': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_churn_distribution.png', 'tenure_histogram': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_tenure_histogram.png', 'churn_by_contract': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_churn_by_contract.png', 'charges_by_churn': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_charges_by_churn.png'}}
+02:20:47.854 | INFO    | Task run 'eda-visualise-937' - Finished in state Completed()
+02:20:48.064 | INFO    | Task run 'persist-clean-dataset-7d2' - [1.3-persist] Saved full-data EDA dataset; ML fits its own preprocessing | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/data/telco_churn_clean.csv', 'rows': 7043}
+02:20:48.068 | INFO    | Task run 'persist-clean-dataset-7d2' - Finished in state Completed()
+02:20:48.095 | INFO    | Flow run 'acrid-angelfish' - [flow-end] Data pipeline run completed successfully | {}
+02:20:48.959 | INFO    | Flow run 'acrid-angelfish' - Finished in state Completed()
+02:20:49.546 | INFO    | Flow run 'native-pillbug' - Beginning subflow run 'native-pillbug' for flow 'telco-ml-pipeline'
+02:20:49.548 | INFO    | Flow run 'native-pillbug' - View at http://127.0.0.1:4207/runs/flow-run/4805f144-867e-44af-8003-ecdcfaa344c0
+02:20:49.579 | INFO    | Flow run 'native-pillbug' - [flow-start] ML pipeline run started | {}
+02:20:49.623 | INFO    | Task run 'load-model-data-1d9' - [2.1-load] Loaded pre-imputation snapshot; transformations fit on train only | {'rows': 7043, 'cols': 21}
+02:20:49.627 | INFO    | Task run 'load-model-data-1d9' - Finished in state Completed()
+02:20:49.688 | INFO    | Task run 'train-test-split-c65' - [2.2-split] Split data 70/30 (stratified) | {'train_rows': 4930, 'test_rows': 2113, 'test_size': 0.3}
+02:20:49.692 | INFO    | Task run 'train-test-split-c65' - Finished in state Completed()
+02:20:49.919 | INFO    | Task run 'train-logistic-regression-ae9' - [2.4-mlops] Trained & evaluated Logistic Regression | {'model': 'LogisticRegression', 'accuracy': 0.797, 'precision': 0.6435, 'recall': 0.5276, 'f1_score': 0.5798, 'roc_auc': 0.8403, 'ts': '2026-10-25T20:50:49.872503+00:00'}
+02:20:49.923 | INFO    | Task run 'train-logistic-regression-ae9' - Finished in state Completed()
+02:20:51.686 | INFO    | Task run 'train-random-forest-74c' - [2.4-mlops] Trained & evaluated Random Forest | {'model': 'RandomForest', 'accuracy': 0.7847, 'precision': 0.6205, 'recall': 0.4866, 'f1_score': 0.5455, 'roc_auc': 0.8173, 'ts': '2026-10-25T20:50:51.421896+00:00'}
+02:20:51.690 | INFO    | Task run 'train-random-forest-74c' - Finished in state Completed()
+02:20:51.804 | INFO    | Task run 'record-metrics-history-537' - [2.4-mlops] Appended metrics to monitoring history | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/metrics_history.csv', 'models': ['LogisticRegression', 'RandomForest']}
+02:20:51.807 | INFO    | Task run 'record-metrics-history-537' - Finished in state Completed()
+02:20:52.178 | INFO    | Task run 'plot-model-comparison-259' - [2.4-mlops] Saved model comparison chart | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/model_comparison.png'}
+02:20:52.181 | INFO    | Task run 'plot-model-comparison-259' - Finished in state Completed()
+02:20:52.463 | INFO    | Task run 'plot-confusion-matrices-930' - [2.4-mlops] Saved confusion matrices | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/confusion_matrices.png'}
+02:20:52.467 | INFO    | Task run 'plot-confusion-matrices-930' - Finished in state Completed()
+02:20:52.493 | INFO    | Flow run 'native-pillbug' - [flow-end] ML pipeline run completed | {'best_model': 'LogisticRegression', 'best_f1': 0.5798}
+02:20:53.550 | INFO    | Flow run 'native-pillbug' - Finished in state Completed()
+02:20:54.617 | INFO    | Flow run 'busy-kelpie' - Finished in state Completed()
+02:22:38.250 | INFO    | Flow run 'elfish-frogmouth' - Downloading flow code from storage at '.'
+02:22:44.790 | INFO    | Flow run 'elfish-frogmouth' - Beginning flow run 'elfish-frogmouth' for flow 'telco-assignment-workflow'
+02:22:44.796 | INFO    | Flow run 'elfish-frogmouth' - View at http://127.0.0.1:4207/runs/flow-run/01a174cd-1039-7aa4-842c-a00872da4744
+02:22:45.131 | INFO    | Flow run 'ludicrous-snake' - Beginning subflow run 'ludicrous-snake' for flow 'telco-data-pipeline'
+02:22:45.133 | INFO    | Flow run 'ludicrous-snake' - View at http://127.0.0.1:4207/runs/flow-run/36a9f7c7-14da-4a51-88a0-c5d3884919ba
+02:22:45.165 | INFO    | Flow run 'ludicrous-snake' - [flow-start] Data pipeline run started | {}
+02:22:45.257 | INFO    | Task run 'ingest-data-5ad' - [1.2-ingestion] Loaded raw dataset | {'rows': 7043, 'cols': 21}
+02:22:45.261 | INFO    | Task run 'ingest-data-5ad' - Finished in state Completed()
+02:22:45.332 | INFO    | Task run 'coerce-and-summarise-051' - [1.3-summary-stats] Computed summary statistics | {'numeric_features': ['SeniorCitizen', 'tenure', 'MonthlyCharges', 'TotalCharges']}
+02:22:45.363 | INFO    | Task run 'coerce-and-summarise-051' - [1.3-data-types] Captured column data types | {'n_numeric': 4, 'n_non_numeric': 17, 'column_types': {'customerID': 'object', 'gender': 'object', 'SeniorCitizen': 'int64', 'Partner': 'object', 'Dependents': 'object', 'tenure': 'int64', 'PhoneService': 'object', 'MultipleLines': 'object', 'InternetService': 'object', 'OnlineSecurity': 'object', 'OnlineBackup': 'object', 'DeviceProtection': 'object', 'TechSupport': 'object', 'StreamingTV': 'object', 'StreamingMovies': 'object', 'Contract': 'object', 'PaperlessBilling': 'object', 'PaymentMethod': 'object', 'MonthlyCharges': 'float64', 'TotalCharges': 'float64', 'Churn': 'object'}}
+02:22:45.464 | INFO    | Task run 'coerce-and-summarise-051' - Finished in state Completed()
+02:22:45.523 | INFO    | Task run 'check-and-induce-missing-56d' - [1.3-missing-check] Checked missing values (pre-induction) | {'columns_with_missing': ['TotalCharges'], 'total_missing': 11}
+02:22:45.695 | INFO    | Task run 'check-and-induce-missing-56d' - [1.3-induce-missing] Induced missing data into numeric columns | {'induced': {'tenure': 352, 'MonthlyCharges': 352, 'TotalCharges': 352}}
+02:22:45.782 | INFO    | Task run 'check-and-induce-missing-56d' - [1.3-missing-check-post] Checked missing values (post-induction) | {'total_missing': 1066}
+02:22:45.818 | INFO    | Task run 'check-and-induce-missing-56d' - [1.3-impute] Imputed numeric missing values with median | {'remaining_missing': 0}
+02:22:45.822 | INFO    | Task run 'check-and-induce-missing-56d' - Finished in state Completed()
+02:22:45.985 | INFO    | Task run 'normalise-data-bc8' - [1.3-normalise] Min-Max normalised numeric columns to [0,1] | {'normalised': ['tenure', 'MonthlyCharges', 'TotalCharges']}
+02:22:45.989 | INFO    | Task run 'normalise-data-bc8' - Finished in state Completed()
+02:22:46.137 | INFO    | Task run 'eda-encode-and-bin-01d' - [1.4-binning] Binned tenure into tenure_group | {'bins': {'0-1 yr': 2092, '2-4 yr': 1858, '5+ yr': 1336, '1-2 yr': 967, '4-5 yr': 790}}
+02:22:46.161 | INFO    | Task run 'eda-encode-and-bin-01d' - [1.4-encoding] Label-encoded categorical features | {'n_encoded': 16}
+02:22:46.228 | INFO    | Task run 'eda-encode-and-bin-01d' - Finished in state Completed()
+02:22:46.679 | INFO    | Task run 'eda-correlation-f36' - [1.4-correlation] Computed correlation coefficients | {'top_target_correlations': {'tenure': -0.34, 'TotalCharges': -0.196, 'MonthlyCharges': 0.188, 'SeniorCitizen': 0.151}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/correlation_heatmap.png'}
+02:22:46.683 | INFO    | Task run 'eda-correlation-f36' - Finished in state Completed()
+02:22:48.973 | INFO    | Task run 'eda-feature-importance-56a' - [1.4-feature-importance] Assessed feature importance (Random Forest) | {'top_features': {'TotalCharges': 0.1594, 'tenure': 0.1442, 'MonthlyCharges': 0.1356, 'Contract': 0.0807, 'PaymentMethod': 0.0648}, 'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/feature_importance.png'}
+02:22:48.976 | INFO    | Task run 'eda-feature-importance-56a' - Finished in state Completed()
+02:22:49.212 | INFO    | Task run 'eda-visualise-19a' - [1.4-categorical-association] Calculated Cramer's V for categorical features | {'top_associations': [{'feature': 'Contract', 'cramers_v': 0.4101156965761409}, {'feature': 'OnlineSecurity', 'cramers_v': 0.3474004326740552}, {'feature': 'TechSupport', 'cramers_v': 0.3429161982469257}, {'feature': 'tenure_group', 'cramers_v': 0.3405349243382388}, {'feature': 'InternetService', 'cramers_v': 0.32245455521230887}]}
+02:22:50.171 | INFO    | Task run 'eda-visualise-19a' - [1.4-visualise] Generated univariate & bivariate charts | {'charts': {'churn_distribution': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_churn_distribution.png', 'tenure_histogram': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/univariate_tenure_histogram.png', 'churn_by_contract': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_churn_by_contract.png', 'charges_by_churn': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/eda/bivariate_charges_by_churn.png'}}
+02:22:50.175 | INFO    | Task run 'eda-visualise-19a' - Finished in state Completed()
+02:22:50.386 | INFO    | Task run 'persist-clean-dataset-00d' - [1.3-persist] Saved full-data EDA dataset; ML fits its own preprocessing | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/data/telco_churn_clean.csv', 'rows': 7043}
+02:22:50.389 | INFO    | Task run 'persist-clean-dataset-00d' - Finished in state Completed()
+02:22:50.416 | INFO    | Flow run 'ludicrous-snake' - [flow-end] Data pipeline run completed successfully | {}
+02:22:51.138 | INFO    | Flow run 'ludicrous-snake' - Finished in state Completed()
+02:22:51.711 | INFO    | Flow run 'strong-fulmar' - Beginning subflow run 'strong-fulmar' for flow 'telco-ml-pipeline'
+02:22:51.712 | INFO    | Flow run 'strong-fulmar' - View at http://127.0.0.1:4207/runs/flow-run/b0a34cac-1075-457b-9ea6-337798f8b4fc
+02:22:51.744 | INFO    | Flow run 'strong-fulmar' - [flow-start] ML pipeline run started | {}
+02:22:51.788 | INFO    | Task run 'load-model-data-038' - [2.1-load] Loaded pre-imputation snapshot; transformations fit on train only | {'rows': 7043, 'cols': 21}
+02:22:51.793 | INFO    | Task run 'load-model-data-038' - Finished in state Completed()
+02:22:51.848 | INFO    | Task run 'train-test-split-396' - [2.2-split] Split data 70/30 (stratified) | {'train_rows': 4930, 'test_rows': 2113, 'test_size': 0.3}
+02:22:51.853 | INFO    | Task run 'train-test-split-396' - Finished in state Completed()
+02:22:52.096 | INFO    | Task run 'train-logistic-regression-5cf' - [2.4-mlops] Trained & evaluated Logistic Regression | {'model': 'LogisticRegression', 'accuracy': 0.797, 'precision': 0.6435, 'recall': 0.5276, 'f1_score': 0.5798, 'roc_auc': 0.8403, 'ts': '2026-10-25T20:52:52.048058+00:00'}
+02:22:52.100 | INFO    | Task run 'train-logistic-regression-5cf' - Finished in state Completed()
+02:22:53.867 | INFO    | Task run 'train-random-forest-bf5' - [2.4-mlops] Trained & evaluated Random Forest | {'model': 'RandomForest', 'accuracy': 0.7847, 'precision': 0.6205, 'recall': 0.4866, 'f1_score': 0.5455, 'roc_auc': 0.8173, 'ts': '2026-10-25T20:52:53.602888+00:00'}
+02:22:53.872 | INFO    | Task run 'train-random-forest-bf5' - Finished in state Completed()
+02:22:53.987 | INFO    | Task run 'record-metrics-history-cd2' - [2.4-mlops] Appended metrics to monitoring history | {'path': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/metrics_history.csv', 'models': ['LogisticRegression', 'RandomForest']}
+02:22:53.990 | INFO    | Task run 'record-metrics-history-cd2' - Finished in state Completed()
+02:22:54.347 | INFO    | Task run 'plot-model-comparison-d72' - [2.4-mlops] Saved model comparison chart | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/model_comparison.png'}
+02:22:54.351 | INFO    | Task run 'plot-model-comparison-d72' - Finished in state Completed()
+02:22:54.632 | INFO    | Task run 'plot-confusion-matrices-529' - [2.4-mlops] Saved confusion matrices | {'chart': '/home/s2025mt03009/workspace/BITS_API_Assignment1/outputs/current/models/confusion_matrices.png'}
+02:22:54.637 | INFO    | Task run 'plot-confusion-matrices-529' - Finished in state Completed()
+02:22:54.662 | INFO    | Flow run 'strong-fulmar' - [flow-end] ML pipeline run completed | {'best_model': 'LogisticRegression', 'best_f1': 0.5798}
+02:22:55.715 | INFO    | Flow run 'strong-fulmar' - Finished in state Completed()
+02:22:55.980 | INFO    | Flow run 'elfish-frogmouth' - Finished in state Completed()

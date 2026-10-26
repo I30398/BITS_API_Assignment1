@@ -1,0 +1,14 @@
+{
+  "capture_tool": "CleanShot X",
+  "captured_at_local": "2026-10-26T21:48:08+05:30",
+  "source_image_sha256": "10d1cc71bf610ff9273b5287b15972e6209ef2e3ab332731c499b943051d07d9",
+  "crop_pixels": [
+    0,
+    1180,
+    3456,
+    1825
+  ],
+  "file": "08_lifecycle.png",
+  "sha256": "c724291d6b3be34bf5e8ca20cdd4dac009bd134a40fd0563149ceef04ed85639",
+  "editing": "Rectangular crop of terminal result only; no text, metrics or run states changed."
+}

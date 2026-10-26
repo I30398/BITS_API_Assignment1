@@ -1,0 +1,189 @@
+{
+  "retrieved_at": "2026-10-25T20:53:00.182337+00:00",
+  "source_sha256": "09b367c85672de3db3bb76acc243bb41a27328fc2ba4e396e817375a63596dcd",
+  "pipeline_version": "2",
+  "flows": [
+    {
+      "name": "telco-assignment-workflow",
+      "id": "6c718ac9-708c-4b94-b28f-53f2f1356f5c",
+      "created": "2026-10-25T20:42:37.947025+00:00"
+    },
+    {
+      "name": "telco-data-pipeline",
+      "id": "1a4d20f4-9f38-4f58-87fd-bc9c7424cf7c",
+      "created": "2026-10-25T20:44:47.343335+00:00"
+    },
+    {
+      "name": "telco-ml-pipeline",
+      "id": "68e1b742-2658-4b67-9fe4-e3c621ec52b5",
+      "created": "2026-10-25T20:44:54.968275+00:00"
+    }
+  ],
+  "deployments": [
+    {
+      "name": "telco-assignment-every-2min",
+      "id": "524fc8a9-4054-4e3e-a078-3f97a6245033",
+      "paused": false,
+      "concurrency_limit": 1,
+      "tags": [
+        "assignment1",
+        "dataops",
+        "mlops"
+      ],
+      "schedules": [
+        {
+          "active": true,
+          "interval_seconds": 120.0
+        }
+      ]
+    }
+  ],
+  "recent_flow_runs": [
+    {
+      "name": "strong-fulmar",
+      "state": "Completed",
+      "id": "b0a34cac-1075-457b-9ea6-337798f8b4fc",
+      "flow_id": "68e1b742-2658-4b67-9fe4-e3c621ec52b5",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:52:51.671580+00:00",
+      "total_run_time_s": 3.039353
+    },
+    {
+      "name": "ludicrous-snake",
+      "state": "Completed",
+      "id": "36a9f7c7-14da-4a51-88a0-c5d3884919ba",
+      "flow_id": "1a4d20f4-9f38-4f58-87fd-bc9c7424cf7c",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:52:45.085010+00:00",
+      "total_run_time_s": 5.340714
+    },
+    {
+      "name": "elfish-frogmouth",
+      "state": "Completed",
+      "id": "01a174cd-1039-7aa4-842c-a00872da4744",
+      "flow_id": "6c718ac9-708c-4b94-b28f-53f2f1356f5c",
+      "deployment_id": "524fc8a9-4054-4e3e-a078-3f97a6245033",
+      "start_time": "2026-10-25T20:52:44.726112+00:00",
+      "total_run_time_s": 11.054681
+    },
+    {
+      "name": "native-pillbug",
+      "state": "Completed",
+      "id": "4805f144-867e-44af-8003-ecdcfaa344c0",
+      "flow_id": "68e1b742-2658-4b67-9fe4-e3c621ec52b5",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:50:49.502954+00:00",
+      "total_run_time_s": 3.036332
+    },
+    {
+      "name": "acrid-angelfish",
+      "state": "Completed",
+      "id": "b8a687c4-7064-4c10-b6cb-5549ad96dcb4",
+      "flow_id": "1a4d20f4-9f38-4f58-87fd-bc9c7424cf7c",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:50:42.879114+00:00",
+      "total_run_time_s": 5.227069
+    },
+    {
+      "name": "busy-kelpie",
+      "state": "Completed",
+      "id": "01a174cd-1039-77a9-a78a-73d71ca7698d",
+      "flow_id": "6c718ac9-708c-4b94-b28f-53f2f1356f5c",
+      "deployment_id": "524fc8a9-4054-4e3e-a078-3f97a6245033",
+      "start_time": "2026-10-25T20:50:42.513176+00:00",
+      "total_run_time_s": 11.10659
+    },
+    {
+      "name": "rigorous-hound",
+      "state": "Completed",
+      "id": "adb804f7-cfa3-407c-b8e2-3a2495a05f28",
+      "flow_id": "68e1b742-2658-4b67-9fe4-e3c621ec52b5",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:48:49.693423+00:00",
+      "total_run_time_s": 3.004058
+    },
+    {
+      "name": "exuberant-harrier",
+      "state": "Completed",
+      "id": "4e2cd3c5-b759-4c98-802f-29e9dae18d8a",
+      "flow_id": "1a4d20f4-9f38-4f58-87fd-bc9c7424cf7c",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:48:43.111952+00:00",
+      "total_run_time_s": 5.203883
+    },
+    {
+      "name": "radical-dugong",
+      "state": "Completed",
+      "id": "01a174cd-1039-7776-820f-92273f6ef75c",
+      "flow_id": "6c718ac9-708c-4b94-b28f-53f2f1356f5c",
+      "deployment_id": "524fc8a9-4054-4e3e-a078-3f97a6245033",
+      "start_time": "2026-10-25T20:48:42.737482+00:00",
+      "total_run_time_s": 11.064517
+    },
+    {
+      "name": "neon-shrew",
+      "state": "Completed",
+      "id": "6630b200-467f-4d97-947c-4362bbe4d13d",
+      "flow_id": "68e1b742-2658-4b67-9fe4-e3c621ec52b5",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:46:48.922844+00:00",
+      "total_run_time_s": 2.986397
+    },
+    {
+      "name": "refreshing-clam",
+      "state": "Completed",
+      "id": "e0e97363-76c4-4225-8b56-0becaed352ed",
+      "flow_id": "1a4d20f4-9f38-4f58-87fd-bc9c7424cf7c",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:46:42.325330+00:00",
+      "total_run_time_s": 5.140629
+    },
+    {
+      "name": "convivial-unicorn",
+      "state": "Completed",
+      "id": "01a174cd-1039-74c1-9518-ea6783ce2d35",
+      "flow_id": "6c718ac9-708c-4b94-b28f-53f2f1356f5c",
+      "deployment_id": "524fc8a9-4054-4e3e-a078-3f97a6245033",
+      "start_time": "2026-10-25T20:46:41.951342+00:00",
+      "total_run_time_s": 10.084942
+    },
+    {
+      "name": "cautious-gaur",
+      "state": "Completed",
+      "id": "a90e9411-d165-40df-9e8a-7942ef6cded4",
+      "flow_id": "68e1b742-2658-4b67-9fe4-e3c621ec52b5",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:44:55.046204+00:00",
+      "total_run_time_s": 3.045587
+    },
+    {
+      "name": "boisterous-beluga",
+      "state": "Completed",
+      "id": "6d629fe6-5e4e-459a-b4ce-11794839519a",
+      "flow_id": "1a4d20f4-9f38-4f58-87fd-bc9c7424cf7c",
+      "deployment_id": null,
+      "start_time": "2026-10-25T20:44:47.428670+00:00",
+      "total_run_time_s": 6.037417
+    },
+    {
+      "name": "exceptional-oriole",
+      "state": "Completed",
+      "id": "01a174cd-1039-7b20-9a68-466fd0b2104b",
+      "flow_id": "6c718ac9-708c-4b94-b28f-53f2f1356f5c",
+      "deployment_id": "524fc8a9-4054-4e3e-a078-3f97a6245033",
+      "start_time": "2026-10-25T20:44:46.461792+00:00",
+      "total_run_time_s": 12.72819
+    }
+  ],
+  "work_pools": [],
+  "run_statistics": {
+    "scope": "Sample of up to 200 runs for this project's flows; includes subflows",
+    "total_flow_runs_sampled": 46,
+    "runs_by_state": {
+      "Completed": 15,
+      "Scheduled": 31
+    },
+    "n_flows": 3,
+    "n_deployments": 1
+  }
+}

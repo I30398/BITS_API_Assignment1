@@ -1,0 +1,3 @@
+Starting dashboard; allowing 300 seconds for readiness...
+Dashboard: http://127.0.0.1:4207
+Automatic cycle every two minutes. Keep this window open; Ctrl+C stops owned services.

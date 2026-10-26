@@ -1,8 +1,31 @@
-# Assignment I local review validation
+# Assignment I validation
 
-The revised code was verified on 25 October 2026. This is a local review
-checkpoint; actual cloud hosting, group details and the uploaded demonstration
-video remain outside this checkpoint.
+## Cloud review on 26 October 2026
+
+The BITS Prayogshala CCZG506 VM passed all 14 functional checks, including
+completed scheduled parent workflows and the 120-second/concurrency-one
+deployment configuration. The 43-file frozen output set has been imported;
+archive and individual inventory hashes matched. Six cropped provider/application
+captures retain their own later host identity and capture times.
+
+The provisioned launcher was tested again on a replacement VM. It resumed the
+private dashboard with HTTP 200 and five fresh completed scheduled parent cycles.
+After waiting for idle project flows, SIGINT cleanly stopped the launcher, private
+dashboard and owned PostgreSQL server. The temporary GitHub sign-in used for
+evidence transfer was removed. See
+[the cloud evidence record](../evidence/cloud-prayogshala-20261026/README.md).
+
+Four report-evidence regression tests and ten existing launcher tests passed
+together. The new tests reject changed metrics, altered screenshots and paths
+outside the snapshot, and preserve the original verification scope claims.
+The cloud review report has 11 pages; every page of the latest render was
+visually inspected. Final report generation correctly refuses the missing
+demonstration video URL. Group 15's supplied membership and 20% shares are set.
+
+## Historical local checkpoint on 25 October 2026
+
+The following results describe the earlier local checkpoint. Cloud hosting and
+group details were added later as recorded above; the video URL is still pending.
 
 ## Verified results
 

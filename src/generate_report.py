@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -61,7 +62,8 @@ def table(doc, columns, rows, widths=None):
                 margins.append(element)
             props.append(margins)
             for paragraph in cell.paragraphs:
-                if row_index == 0:
+                if (row_index < len(result.rows) - 1 and
+                        (len(result.rows) <= 9 or row_index <= 1)):
                     paragraph.paragraph_format.keep_with_next = True
                 paragraph.paragraph_format.space_after = Pt(3)
                 paragraph.paragraph_format.space_before = Pt(3)
@@ -103,12 +105,58 @@ def validate_group(group):
     return group
 
 
-def build(draft=False, group_path=None):
+def validate_snapshot(root):
+    """Verify the frozen output set without modifying its original manifests."""
+    root = Path(root).resolve()
+    inventory = read_json(root / "inventory.json")
+    if not inventory:
+        raise ValueError("The frozen snapshot needs an inventory.")
+    for item in inventory:
+        path = (root / item["path"]).resolve()
+        if not path.is_relative_to(root) or not path.is_file():
+            raise ValueError("Invalid snapshot path: " + item["path"])
+        if hashlib.sha256(path.read_bytes()).hexdigest() != item["sha256"]:
+            raise ValueError("Snapshot checksum mismatch: " + item["path"])
+    hosting = read_json(root / "hosting.json", {})
+    verification = read_json(root / "outputs/verification.json", {})
+    if (hosting.get("provider") != "BITS Prayogshala" or not hosting.get("hostname")
+            or not hosting.get("functional_checks_passed")
+            or len(verification.get("checks", {})) < 14
+            or not all(verification["checks"].values())
+            or len(verification.get("scheduled_parent_runs", [])) < 2):
+        raise ValueError("The snapshot lacks successful hosting and scheduled-run evidence.")
+    screenshots = root / "screenshots"
+    captures = read_json(screenshots / "capture_inventory.json", {})
+    # The capture record has a different host and time from the frozen run.
+    # Validate its own hashes rather than implying it belongs to that same run.
+    names = set()
+    for item in captures.get("captures", []):
+        path = (screenshots / item["file"]).resolve()
+        if (not path.is_relative_to(screenshots) or not path.is_file()
+                or hashlib.sha256(path.read_bytes()).hexdigest() != item["sha256"]):
+            raise ValueError("Screenshot checksum mismatch: " + item["file"])
+        names.add(item["file"])
+    required = {"01_dashboard.png", "02_flow_runs.png", "03_deployments.png",
+                "05_ml_run_logs.png", "06_data_run_logs.png", "07_hosting.png"}
+    if not required <= names or not captures.get("vm_host"):
+        raise ValueError("The cloud snapshot needs all six documented captures.")
+    hosting = dict(hosting, screenshot_host=captures["vm_host"])
+    return hosting, verification
+
+
+def build(draft=False, group_path=None, snapshot_root=None, output_dir=None):
     group_path = group_path or config.PROJECT_ROOT / "config/group.json"
     group = read_json(group_path, {})
-    metrics = read_json(config.MODELS_DIR / "latest_metrics.json")
-    run = read_json(config.OUTPUTS_DIR / "latest_run.json", {})
-    api = read_json(config.OUTPUTS_DIR / "api_details.json", {})
+    hosting = verification = None
+    if snapshot_root:
+        snapshot_root = Path(snapshot_root).resolve()
+        hosting, verification = validate_snapshot(snapshot_root)
+    outputs = snapshot_root / "outputs" if snapshot_root else config.OUTPUTS_DIR
+    models, eda = outputs / "models", outputs / "eda"
+    screenshots = snapshot_root / "screenshots" if snapshot_root else config.SCREENSHOTS_DIR
+    metrics = read_json(models / "latest_metrics.json")
+    run = read_json(outputs / "latest_run.json", {})
+    api = read_json(outputs / "api_details.json", {})
     if not metrics:
         raise ValueError("Run the revised workflow before generating a report.")
     if metrics.get("source_sha256") != source_fingerprint():
@@ -118,10 +166,10 @@ def build(draft=False, group_path=None):
         if not group.get("video_url"):
             raise ValueError("Add the uploaded demonstration video's URL before final generation.")
         if not group.get("cloud_evidence_confirmed"):
-            raise ValueError("Cloud hosting evidence is not confirmed. Use --draft for local review.")
+            raise ValueError("Cloud hosting evidence is not confirmed. Use --draft for review.")
         for name in ["01_dashboard.png", "02_flow_runs.png", "03_deployments.png",
                      "05_ml_run_logs.png", "06_data_run_logs.png"]:
-            if not (config.SCREENSHOTS_DIR / name).exists():
+            if not (screenshots / name).exists():
                 raise ValueError(f"Capture current dashboard evidence: {name}")
         if api.get("source_sha256") != source_fingerprint():
             raise ValueError("Capture fresh API details from the current implementation.")
@@ -161,7 +209,24 @@ def build(draft=False, group_path=None):
     doc.add_paragraph(f"Execution environment: {run.get('environment', 'local')}. "
         f"Latest completed cycle: {run.get('completed_at', 'not captured')}. "
         "The original repository outputs are retained separately from these results.")
-    if not group.get("cloud_evidence_confirmed"):
+    if hosting:
+        doc.add_paragraph(
+            f"The application ran on the {hosting['provider']} CCZG506 virtual lab, "
+            f"host {hosting['hostname']}. The frozen output set was captured at "
+            f"{hosting['captured_at']}. Its inventory hashes were verified after transfer.")
+        doc.add_paragraph(
+            f"All {len(verification['checks'])} functional checks passed. "
+            f"The API recorded {len(verification['scheduled_parent_runs'])} completed "
+            "scheduled parent cycles with a 120-second interval and concurrency of one. "
+            "Provider and dashboard screenshots were captured later, on 26 October 2026, "
+            f"after services resumed on replacement host {hosting['screenshot_host']}. "
+            "The screenshots and frozen results retain their separate capture times.")
+        doc.add_paragraph(
+            "The verification manifest retains its default local environment label and "
+            "does not independently certify hosting. Cloud execution is supported by the "
+            "VM metadata, provider status and application captures together. "
+            "The dashboard is private and session-bound; the lab's inactivity limits apply.")
+    elif not group.get("cloud_evidence_confirmed"):
         doc.add_paragraph("The evidence in this review demonstrates local execution. "
                           "Cloud hosting has not yet been demonstrated.")
     doc.add_paragraph("1 Data pipeline", "Heading 1")
@@ -171,20 +236,20 @@ def build(draft=False, group_path=None):
         "Telco Customer Churn dataset contains 7043 records and 21 columns. Churn is a "
         "binary Yes or No target; customerID is excluded from model features.")
     doc.add_paragraph(f"Dataset source: {config.DATASET_URL}")
-    image(doc, config.EDA_DIR / "univariate_churn_distribution.png", "Figure 1 Customer churn class balance", 4.5)
+    image(doc, eda / "univariate_churn_distribution.png", "Figure 1 Customer churn class balance", 4.5)
     doc.add_paragraph("1.2 Preprocessing", "Heading 2")
     doc.add_paragraph("The workflow coerces TotalCharges to numeric, identifies missing values, "
         "and induces 352 missing entries in each of tenure, MonthlyCharges and TotalCharges "
         "using a fixed random seed. Full-data EDA uses median imputation and Min-Max "
         "normalisation. The pre-imputation snapshot is passed separately to ML so that "
         "test records cannot influence training preprocessing.")
-    stats = pd.read_csv(config.OUTPUTS_DIR / "summary_statistics.csv", index_col=0)
+    stats = pd.read_csv(outputs / "summary_statistics.csv", index_col=0)
     table(doc, ["Feature", "Count", "Mean", "Std", "Min", "Max"],
           [[idx, int(row['count']), *[f"{row[k]:.2f}" for k in ['mean', 'std', 'min', 'max']]]
            for idx, row in stats.iterrows()], [1.45, 0.7, 1.1, 1.1, 1.0, 1.15])
-    types = pd.read_csv(config.OUTPUTS_DIR / "data_types.csv")
+    types = pd.read_csv(outputs / "data_types.csv")
     table(doc, ["Column", "Data type"], types.values.tolist(), [4.3, 2.2])
-    preview = pd.read_csv(config.OUTPUTS_DIR / "normalisation_preview.csv")
+    preview = pd.read_csv(outputs / "normalisation_preview.csv")
     table(doc, ["Numeric feature", "Original example", "Normalised example"],
           [[c, f"{preview.iloc[0][c]:.2f}", f"{preview.iloc[0][c + '_norm']:.4f}"]
            for c in config.NUMERIC_COLUMNS], [2.5, 2, 2])
@@ -194,7 +259,7 @@ def build(draft=False, group_path=None):
         "target. Cramer's V measures categorical association without assuming an ordering "
         "between category codes. Random Forest exploratory importance is aggregated "
         "from one-hot category levels, using each original numeric feature once.")
-    assoc = pd.read_csv(config.OUTPUTS_DIR / "categorical_associations.csv").head(6)
+    assoc = pd.read_csv(outputs / "categorical_associations.csv").head(6)
     table(doc, ["Categorical feature", "Association with churn"],
           [[row.feature, f"{row.cramers_v:.3f}"] for row in assoc.itertuples()], [3.5, 3])
     for name, caption in [
@@ -203,7 +268,7 @@ def build(draft=False, group_path=None):
         ("univariate_tenure_histogram.png", "Figure 4 Univariate tenure distribution"),
         ("bivariate_churn_by_contract.png", "Figure 5 Churn rate by contract"),
         ("bivariate_charges_by_churn.png", "Figure 6 Charges by churn outcome")]:
-        image(doc, config.EDA_DIR / name, caption, 5.5)
+        image(doc, eda / name, caption, 5.5)
     doc.add_paragraph("1.4 DataOps scheduling and monitoring", "Heading 2")
     doc.add_paragraph("One deployment runs every 120 seconds with concurrency limited to "
         "one cycle. DataOps completes before MLOps starts. Complete files are published by "
@@ -213,7 +278,7 @@ def build(draft=False, group_path=None):
     for name, caption in [("03_deployments.png", "Figure 7 Deployment interval and status"),
                           ("02_flow_runs.png", "Figure 8 Scheduled execution history"),
                           ("06_data_run_logs.png", "Figure 9 Data preparation activity logs")]:
-        image(doc, config.SCREENSHOTS_DIR / name, caption)
+        image(doc, screenshots / name, caption)
     doc.add_paragraph("2 Machine learning pipeline", "Heading 1")
     doc.add_paragraph("2.1 Preparation training and evaluation", "Heading 2")
     doc.add_paragraph("Logistic Regression provides a linear baseline; Random Forest "
@@ -225,8 +290,8 @@ def build(draft=False, group_path=None):
     table(doc, ["Model", "Accuracy", "Precision", "Recall", "F1", "ROC AUC"],
           [[m['model'], *[f"{m[k]:.4f}" for k in ['accuracy', 'precision', 'recall', 'f1_score', 'roc_auc']]]
            for m in metrics['models']], [1.6, .98, .98, .98, .98, .98])
-    image(doc, config.MODELS_DIR / "model_comparison.png", "Figure 10 Five metrics for each model")
-    image(doc, config.MODELS_DIR / "confusion_matrices.png", "Figure 11 Holdout confusion matrices")
+    image(doc, models / "model_comparison.png", "Figure 10 Five metrics for each model")
+    image(doc, models / "confusion_matrices.png", "Figure 11 Holdout confusion matrices")
     doc.add_paragraph("2.2 MLOps and interpretation", "Heading 2")
     doc.add_paragraph("Every cycle records accuracy, precision, recall, F1 and ROC AUC "
         "for both models. The metrics history records timestamps, pipeline version and "
@@ -234,7 +299,14 @@ def build(draft=False, group_path=None):
         "monitoring and logging; it does not establish drift detection or performance "
         "on a changing production population. Recall measures the proportion of actual "
         "churners identified, while precision measures how many flagged customers churn.")
-    image(doc, config.SCREENSHOTS_DIR / "05_ml_run_logs.png", "Figure 12 ML task logs and metrics")
+    best = metrics['best']
+    doc.add_paragraph(
+        f"{best['model']} performed better in this holdout comparison, with ROC AUC "
+        f"{best['roc_auc']:.4f} and recall {best['recall']:.4f}. At the default "
+        f"decision threshold, {100 * (1 - best['recall']):.1f}% of actual churners "
+        "were missed. "
+        "Retention use would require threshold selection and validation on later data.")
+    image(doc, screenshots / "05_ml_run_logs.png", "Figure 12 ML task logs and metrics")
     doc.add_paragraph("3 API access", "Heading 1")
     doc.add_paragraph("The official Prefect client retrieves details through built-in APIs. "
         "Project filters keep unrelated flows out of the evidence. The saved response "
@@ -248,17 +320,27 @@ def build(draft=False, group_path=None):
         ["Recent executed runs", len(api.get('recent_flow_runs', []))],
         ["Sampled run states", str(api.get('run_statistics', {}).get('runs_by_state', {}))],
     ], [1.7, 4.8])
-    image(doc, config.SCREENSHOTS_DIR / "01_dashboard.png", "Figure 13 Dashboard overview")
+    image(doc, screenshots / "01_dashboard.png", "Figure 13 Dashboard overview")
     doc.add_paragraph("4 Reproduction and demonstration", "Heading 1")
-    doc.add_paragraph("Follow README.md for the tested Python 3.12 setup, local server "
-        "and scheduled workflow. The local dashboard is at http://127.0.0.1:4207. "
-        "Run python -m src.api_access to capture current API details. The Docker Compose "
-        "package provides the same server and runner arrangement for local or cloud VM "
-        "execution; selecting cloud configuration alone is not proof of deployment.")
+    if hosting:
+        doc.add_paragraph(
+            "On the provisioned BITS VM, run .venv/bin/python scripts/lab_start.py "
+            "from ~/workspace/BITS_API_Assignment1. The launcher restores the dedicated "
+            "hard NFS mount, checks the persistent PostgreSQL database, then starts "
+            "Prefect on 127.0.0.1:4207 and the two-minute schedule. All runtime and "
+            "project files are under ~/workspace. Stop the launcher with Ctrl+C. "
+            "See docs/DEPLOYMENT.md for setup, storage and private-access details.")
+        image(doc, screenshots / "07_hosting.png", "Figure 14 BITS virtual lab hosting status", 4.8)
+    else:
+        doc.add_paragraph("Follow README.md for the tested Python 3.12 setup, local server "
+            "and scheduled workflow. The local dashboard is at http://127.0.0.1:4207. "
+            "Run python -m src.api_access to capture current API details. The Docker Compose "
+            "package provides the same server and runner arrangement for local or cloud VM "
+            "execution; selecting cloud configuration alone is not proof of deployment.")
     if group.get("video_url"):
         doc.add_paragraph("Demonstration video: " + group['video_url'])
     doc.add_paragraph("Dataset SHA256: " + metrics['raw_dataset_sha256'])
-    output_dir = config.PROJECT_ROOT / "report/current"
+    output_dir = Path(output_dir) if output_dir else config.PROJECT_ROOT / "report/current"
     output_dir.mkdir(parents=True, exist_ok=True)
     name = "CCZG506_Assignment1_Review.docx" if draft else group['group_id'] + '.docx'
     output = output_dir / name
@@ -269,7 +351,9 @@ def build(draft=False, group_path=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--draft", action="store_true", help="Generate a local review with incomplete submission details.")
+    parser.add_argument("--draft", action="store_true", help="Generate a review copy with incomplete submission details.")
     parser.add_argument("--group", type=Path)
+    parser.add_argument("--snapshot-root", type=Path, help="Read a verified frozen cloud snapshot.")
+    parser.add_argument("--output-dir", type=Path)
     args = parser.parse_args()
-    build(args.draft, args.group)
+    build(args.draft, args.group, args.snapshot_root, args.output_dir)

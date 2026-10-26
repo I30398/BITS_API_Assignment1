@@ -148,15 +148,27 @@ change as scheduled cycles run; the frozen review does not.
 
 `config/group.json` contains Group 15's five supplied members and their 20%
 contribution allocations. Review the contribution descriptions with the group
-and add the completed video URL. For another group, start from
-`config/group.example.json` and supply its actual details. Capture new dashboard screenshots
-in `outputs/current/screenshots/` using the names in `docs/DEMONSTRATION.md`.
+and add the completed video URL. The reviewed cloud output set and six cropped
+application/provider screenshots are in `evidence/cloud-prayogshala-20261026/`.
+The cloud review is `report/cloud-review/CCZG506_Assignment1_Review.docx`.
+For another group, start from `config/group.example.json` and supply its actual
+details. Use `docs/DEMONSTRATION.md` when recording the project.
 
-The final report command is `python -m src.generate_report`. It refuses stale
+Reproduce the cloud review with:
+
+```bash
+python -m src.generate_report --draft \
+  --snapshot-root evidence/cloud-prayogshala-20261026 \
+  --output-dir report/cloud-review
+```
+
+After entering the actual video URL, generate the final report with the same
+command and omit `--draft`. It writes `report/cloud-review/15.docx` and refuses stale
 model/API evidence, incomplete group details, absent screenshots or unconfirmed
 cloud evidence. `cloud_evidence_confirmed` is a human confirmation after checking
-actual hosting evidence, not an automatic cloud detection result. Leave it
-false for local review. The report is named after the group ID; only one member
+actual hosting evidence, not an automatic cloud detection result. The frozen
+cloud inventory and screenshot hashes are checked before report generation.
+Leave the flag false for local-only review. Only one member
 uploads the final Word/PDF document to the portal.
 
 Assignment I's supplied brief says **30 October 2026, 11:55 pm**. Confirm any

@@ -1,0 +1,10 @@
+{
+  "captured_at": "2026-10-25T20:54:12.999641+00:00",
+  "provider": "BITS Prayogshala",
+  "lab": "CCZG506 API Driven Cloud Native Virtual",
+  "hostname": "ip-10-3-21-151.ap-south-1.compute.internal",
+  "platform": "Linux-5.14.0-503.14.1.el9_5.x86_64-x86_64-with-glibc2.34",
+  "hosting_scope": "private session-bound VM",
+  "functional_checks_passed": true,
+  "screenshot_evidence_pending": true
+}

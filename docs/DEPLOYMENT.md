@@ -65,7 +65,9 @@ October 2026, Prefect returned HTTP 200 and all 14 functional checks passed,
 including at least two completed scheduled parent workflows at the 120-second
 interval. Five cloud dashboard screenshots were captured and inspected on 26
 October 2026; see [the capture record](../evidence/cloud-prayogshala-20261026/README.md).
-Export of the frozen data, models and verification archive remains pending.
+The frozen data, models, API and verification archive has been imported and its
+inventory hashes verified. A later restart and graceful shutdown also passed;
+the same capture record links the lifecycle result and its separate provenance.
 
 Provisioning checkpoint, 26 October 2026:
 - The original workspace is a **soft** NFS mount. Changing it in place failed.
