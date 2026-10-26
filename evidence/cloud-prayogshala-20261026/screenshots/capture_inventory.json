@@ -67,6 +67,19 @@
         2048
       ],
       "sha256": "2713ba745e4c8468a80df1bb3c06e0e2e5d39e47b70b19c07466b0261b3e62e6"
+    },
+    {
+      "file": "07_hosting.png",
+      "capture_tool": "CleanShot X",
+      "captured_at_local": "2026-10-26T05:35:20.912749+05:30",
+      "source_image_sha256": "fe721db7fb1036273c89ab25b6e4eaa2f717e81a22cd6e6a8b19118475e6e609",
+      "crop_pixels": [
+        1656,
+        316,
+        3456,
+        1370
+      ],
+      "sha256": "a5103554aa11adfd0026aeb6fcb1d761b9e9a48996c456c584c8964a1a6d4ad5"
     }
   ]
 }

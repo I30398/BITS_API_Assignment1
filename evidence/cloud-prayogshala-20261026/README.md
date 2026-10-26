@@ -1,11 +1,11 @@
 # BITS Prayogshala cloud screenshots
 
-These five images were captured from the running Prefect application inside the
-CCZG506 virtual lab on 26 October 2026, after restarting the services on the
+These images were captured from the running Prefect application and its BITS
+hosting portal on 26 October 2026, after restarting the services on the
 replacement VM `ip-10-3-17-92.ap-south-1.compute.internal`.
 
 CleanShot X captured the Mac screen. The committed copies contain only the VM
-application viewport: the macOS interface and outer browser session address were
+application or provider-status viewport: the macOS interface and outer browser session address were
 removed with a rectangular crop. No application content, metrics, logs or run
 states were changed. Capture times, original-image hashes, crop coordinates and
 committed-image hashes are recorded in
@@ -18,6 +18,7 @@ committed-image hashes are recorded in
 | [Deployment](screenshots/03_deployments.png) | One Ready deployment, with an Active schedule every two minutes. |
 | [ML run](screenshots/05_ml_run_logs.png) | Completed seven-task ML pipeline, train/test split, Logistic Regression and Random Forest training, plots and activity logs. |
 | [Data run](screenshots/06_data_run_logs.png) | Completed nine-task DataOps pipeline, ingestion, missing values, normalisation, EDA, persistence and activity logs. |
+| [Hosting status](screenshots/07_hosting.png) | BITS API DRIVEN CLOUD NATIVE VIRTUAL - CCZG506 session Running, with the provider's persistence and inactivity limits. Connection credentials are excluded. |
 
 The ML run `esoteric-starfish` and DataOps run `whispering-polecat` belong to
 the same completed parent workflow, `formidable-magpie`, started at 05:21:37 IST.
