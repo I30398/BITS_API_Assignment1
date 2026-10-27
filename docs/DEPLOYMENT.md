@@ -97,7 +97,8 @@ Linux startup was verified on a replacement lab VM on 26 October 2026: the
 existing workspace and database survived, the hard mount was restored, and the
 private dashboard and scheduler started successfully. All 14 functional checks
 passed again. Run `.venv/bin/python scripts/lab_start.py` in the remote terminal.
-Graceful shutdown remains to be checked on the lab.
+Restart and graceful shutdown were verified on 26 October 2026; the capture
+record documents the separate lifecycle check and its host provenance.
 Ctrl+C stops the owned assignment services before stopping a database it started;
 an already-running database is left running. The hard mount must be restored on
 each new lab VM session; no persistent system mount configuration was changed.

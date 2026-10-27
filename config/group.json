@@ -8,8 +8,8 @@
       "percentage": 20
     },
     {
-      "bits_id": "2025NT03083",
-      "name": "Ajeet Kumar Yadav",
+      "bits_id": "2025MT03071",
+      "name": "Soumyajyoti Biswas",
       "contribution": "Dataset ingestion and data preparation: missing values, duplicate records, column types, cleaned outputs, and preprocessing logs.",
       "percentage": 20
     },
@@ -20,8 +20,8 @@
       "percentage": 20
     },
     {
-      "bits_id": "2025MT03071",
-      "name": "Soumyajyoti Biswas",
+      "bits_id": "2025NT03083",
+      "name": "Ajeet Kumar Yadav",
       "contribution": "Machine learning: stratified 70/30 split, train-fitted preprocessing, Logistic Regression and Random Forest training, and comparison of five evaluation metrics.",
       "percentage": 20
     },
