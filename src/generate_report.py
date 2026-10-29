@@ -12,6 +12,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.shared import Inches, Pt, RGBColor
 
 from src import config
@@ -20,6 +21,33 @@ from src.artifact_io import source_fingerprint
 
 def read_json(path, default=None):
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
+
+
+def resource_link(doc, label, url):
+    """Keep submitted resource URLs visible and clickable in Word and PDF."""
+    paragraph = doc.add_paragraph(label + ": ")
+    paragraph.paragraph_format.space_after = Pt(5)
+    for label_run in paragraph.runs:
+        label_run.font.size = Pt(10)
+    link = OxmlElement("w:hyperlink")
+    link.set(qn("r:id"), paragraph.part.relate_to(url, RT.HYPERLINK, is_external=True))
+    run = OxmlElement("w:r")
+    props = OxmlElement("w:rPr")
+    size = OxmlElement("w:sz")
+    size.set(qn("w:val"), "20")
+    props.append(size)
+    color = OxmlElement("w:color")
+    color.set(qn("w:val"), "0563C1")
+    props.append(color)
+    underline = OxmlElement("w:u")
+    underline.set(qn("w:val"), "single")
+    props.append(underline)
+    run.append(props)
+    text = OxmlElement("w:t")
+    text.text = url
+    run.append(text)
+    link.append(run)
+    paragraph._p.append(link)
 
 
 def table(doc, columns, rows, widths=None):
@@ -330,7 +358,7 @@ def build(draft=False, group_path=None, snapshot_root=None, output_dir=None):
             "Prefect on 127.0.0.1:4207 and the two-minute schedule. All runtime and "
             "project files are under ~/workspace. Stop the launcher with Ctrl+C. "
             "See docs/DEPLOYMENT.md for setup, storage and private-access details.")
-        image(doc, screenshots / "07_hosting.png", "Figure 14 BITS virtual lab hosting status", 4.8)
+        image(doc, screenshots / "07_hosting.png", "Figure 14 BITS virtual lab hosting status", 4.2)
     else:
         doc.add_paragraph("Follow README.md for the tested Python 3.12 setup, local server "
             "and scheduled workflow. The local dashboard is at http://127.0.0.1:4207. "
@@ -338,7 +366,10 @@ def build(draft=False, group_path=None, snapshot_root=None, output_dir=None):
             "package provides the same server and runner arrangement for local or cloud VM "
             "execution; selecting cloud configuration alone is not proof of deployment.")
     if group.get("video_url"):
-        doc.add_paragraph("Demonstration video: " + group['video_url'])
+        resource_link(doc, "Demonstration video", group["video_url"])
+    if group.get("artifacts_url"):
+        resource_link(doc, "Assignment artifacts", group["artifacts_url"])
+    resource_link(doc, "Source code", "https://github.com/I30398/BITS_API_Assignment1")
     doc.add_paragraph("Dataset SHA256: " + metrics['raw_dataset_sha256'])
     output_dir = Path(output_dir) if output_dir else config.PROJECT_ROOT / "report/current"
     output_dir.mkdir(parents=True, exist_ok=True)

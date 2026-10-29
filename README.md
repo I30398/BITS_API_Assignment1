@@ -144,32 +144,36 @@ verification results. The frozen report is
 `evidence/local-review/CCZG506_Assignment1_Review.docx`. Live outputs continue to
 change as scheduled cycles run; the frozen review does not.
 
-## Before submission
+## Submission
 
-`config/group.json` contains Group 15's five supplied members and their 20%
-contribution allocations. Review the contribution descriptions with the group
-and add the completed video URL. The reviewed cloud output set and six cropped
-application/provider screenshots are in `evidence/cloud-prayogshala-20261026/`.
-The cloud review is `report/cloud-review/CCZG506_Assignment1_Review.docx`.
-For another group, start from `config/group.example.json` and supply its actual
-details. Use `docs/DEMONSTRATION.md` when recording the project.
+Group 15's five member identities, qualitative contributions and 20% shares are
+recorded in `config/group.json`, together with the uploaded video and artifacts URLs.
 
-Reproduce the cloud review with:
+- [Assignment artifacts](https://drive.google.com/drive/folders/1J8KbmClrJWQzPwq248O7B81_3NRtQGIK?usp=drive_link)
+- [Whole-project demonstration video](https://drive.google.com/file/d/1-yIpgDq7lpkkwypf6Lnp9yAZhWEdek3l/view?usp=drive_link)
+- Final report: `report/cloud-review/15.docx`.
+
+The report uses the verified frozen cloud outputs and six cropped provider/application
+captures in `evidence/cloud-prayogshala-20261026/`. Earlier local and draft reports
+remain historical evidence. Use the final cloud report for submission.
+
+Regenerate the final report with:
 
 ```bash
-python -m src.generate_report --draft \
+python -m src.generate_report \
   --snapshot-root evidence/cloud-prayogshala-20261026 \
   --output-dir report/cloud-review
 ```
 
-After entering the actual video URL, generate the final report with the same
-command and omit `--draft`. It writes `report/cloud-review/15.docx` and refuses stale
-model/API evidence, incomplete group details, absent screenshots or unconfirmed
-cloud evidence. `cloud_evidence_confirmed` is a human confirmation after checking
-actual hosting evidence, not an automatic cloud detection result. The frozen
-cloud inventory and screenshot hashes are checked before report generation.
-Leave the flag false for local-only review. Only one member
-uploads the final Word/PDF document to the portal.
+Generation checks frozen output/capture hashes and refuses stale model/API evidence,
+incomplete group details, a missing video URL, absent screenshots or unconfirmed
+cloud evidence. `cloud_evidence_confirmed` records the reviewed hosting evidence;
+it is not automatic cloud detection. For another group, use `config/group.example.json`.
+
+Only one member uploads `15.docx` or `15.pdf` to the submission portal. The video
+belongs in the group-named Drive folder. The deck and source/evidence archive are
+optional supporting material; see `docs/SUBMISSION.md`. Check evaluator access to
+both Drive links before submitting. Links alone do not grant viewing permission.
 
 Assignment I's supplied brief says **30 October 2026, 11:55 pm**. Confirm any
 subsequent faculty announcement separately.

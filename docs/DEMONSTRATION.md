@@ -28,3 +28,14 @@ Do not reuse the baseline screenshots as evidence for changed code. Capture the
 screen or browser directly; do not construct or alter execution screenshots.
 Upload the whole-project demonstration to the group-named folder specified by
 the official brief, then put the actual video URL in config/group.json.
+
+## Submitted recording
+
+The user supplied the uploaded demonstration URL on 30 October 2026.
+
+- [Watch the video](https://drive.google.com/file/d/1-yIpgDq7lpkkwypf6Lnp9yAZhWEdek3l/view?usp=drive_link)
+- [Group 15 artifacts folder](https://drive.google.com/drive/folders/1J8KbmClrJWQzPwq248O7B81_3NRtQGIK?usp=drive_link)
+
+The video is already inside this group-named folder. Its file metadata and parent
+folder were checked; the video itself was not reviewed in this finalization step.
+Confirm evaluator viewing permissions before submission.

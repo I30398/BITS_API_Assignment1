@@ -1,5 +1,21 @@
 # Assignment I validation
 
+## Final report on 30 October 2026
+
+The user supplied the uploaded video and artifacts folder URLs. Both are
+recorded in config/group.json and are visible, clickable links in the final
+report, report/cloud-review/15.docx. All 11 latest rendered pages were visually
+reviewed. The final package, member order and 20% contribution shares were checked.
+Frozen cloud inventory and screenshot checksums passed again; runtime/API source
+fingerprint is unchanged. No new cloud run was performed for these document edits.
+The report hash and review details are in report/cloud-review/final_review_record.json.
+
+Drive metadata confirmed that the MP4 is inside the group-named artifacts folder.
+The recording itself was not reviewed. Only owner permissions were observed for
+the folder and video; evaluator viewing access still needs to be granted. No
+sharing settings or remote Drive contents were changed. See docs/SUBMISSION.md
+for required and optional upload files.
+
 ## Cloud review on 26 October 2026
 
 The BITS Prayogshala CCZG506 VM passed all 14 functional checks, including
@@ -25,7 +41,8 @@ demonstration video URL. Group 15's supplied membership and 20% shares are set.
 ## Historical local checkpoint on 25 October 2026
 
 The following results describe the earlier local checkpoint. Cloud hosting and
-group details were added later as recorded above; the video URL is still pending.
+group details were added later as recorded above. The user supplied the video
+URL on 30 October 2026; see the finalization record below.
 
 ## Verified results
 

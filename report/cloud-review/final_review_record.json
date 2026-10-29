@@ -1,0 +1,26 @@
+{
+  "document": "15.docx",
+  "sha256": "bd153576cd5418f91c63fa36e999f31a950db318487bce0a72c1ba4d2bf5620b",
+  "reviewed_on": "2026-10-30",
+  "pages": 11,
+  "all_latest_rendered_pages_visually_reviewed": true,
+  "source_snapshot": "evidence/cloud-prayogshala-20261026",
+  "snapshot_inventory_and_captures_hashes_verified": true,
+  "runtime_source_sha256": "09b367c85672de3db3bb76acc243bb41a27328fc2ba4e396e817375a63596dcd",
+  "group": "15",
+  "member_count": 5,
+  "contribution_percentages": [
+    20,
+    20,
+    20,
+    20,
+    20
+  ],
+  "video_url": "https://drive.google.com/file/d/1-yIpgDq7lpkkwypf6Lnp9yAZhWEdek3l/view?usp=drive_link",
+  "artifacts_url": "https://drive.google.com/drive/folders/1J8KbmClrJWQzPwq248O7B81_3NRtQGIK?usp=drive_link",
+  "both_resource_hyperlinks_verified": true,
+  "video_metadata_and_folder_placement_verified": true,
+  "video_content_reviewed": false,
+  "drive_permissions_observed": "Owner only; evaluator access requires a sharing change by the owner.",
+  "pipeline_rerun_during_report_finalization": false
+}
