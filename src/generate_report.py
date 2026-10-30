@@ -263,7 +263,7 @@ def build(draft=False, group_path=None, snapshot_root=None, output_dir=None):
         "customer churn from account, service and demographic attributes. The public IBM "
         "Telco Customer Churn dataset contains 7043 records and 21 columns. Churn is a "
         "binary Yes or No target; customerID is excluded from model features.")
-    doc.add_paragraph(f"Dataset source: {config.DATASET_URL}")
+    doc.add_paragraph("Dataset source: IBM Telco Customer Churn public dataset.")
     image(doc, eda / "univariate_churn_distribution.png", "Figure 1 Customer churn class balance", 4.5)
     doc.add_paragraph("1.2 Preprocessing", "Heading 2")
     doc.add_paragraph("The workflow coerces TotalCharges to numeric, identifies missing values, "
@@ -369,7 +369,6 @@ def build(draft=False, group_path=None, snapshot_root=None, output_dir=None):
         resource_link(doc, "Demonstration video", group["video_url"])
     if group.get("artifacts_url"):
         resource_link(doc, "Assignment artifacts", group["artifacts_url"])
-    resource_link(doc, "Source code", "https://github.com/I30398/BITS_API_Assignment1")
     doc.add_paragraph("Dataset SHA256: " + metrics['raw_dataset_sha256'])
     output_dir = Path(output_dir) if output_dir else config.PROJECT_ROOT / "report/current"
     output_dir.mkdir(parents=True, exist_ok=True)

@@ -6,6 +6,8 @@ The user supplied the uploaded video and artifacts folder URLs. Both are
 recorded in config/group.json and are visible, clickable links in the final
 report, report/cloud-review/15.docx. All 11 latest rendered pages were visually
 reviewed. The final package, member order and 20% contribution shares were checked.
+The later submission revision removes GitHub URLs from the Word report, PDF
+and presentation, including slide notes, while retaining the Drive links.
 Frozen cloud inventory and screenshot checksums passed again; runtime/API source
 fingerprint is unchanged. No new cloud run was performed for these document edits.
 The report hash and review details are in report/cloud-review/final_review_record.json.
